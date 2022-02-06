@@ -2,16 +2,6 @@
 
 A monolithic server to handle all the backend needs for Hangzone.
 
-Uses:
-
-- JSON API server
-  - hangzones
-  - hangers
-  - maps
-- DB
-  - Read/write
-  - Migrations
-
 Below is a tentative list of tools I plan to use
 
 | Use                | Tool       |
