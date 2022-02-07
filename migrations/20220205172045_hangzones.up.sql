@@ -10,8 +10,8 @@ CREATE TABLE hangzones (
   city text NOT NULL,
   state text,
   country text NOT NULL,
-  postal_code varchar(20) NOT NULL,
+  postal_code varchar(40),
   geography geography(point) NOT NULL,
-  created_at timestamp NOT NULL,
-  updated_at timestamp NOT NULL
+  created_at timestamp NOT NULL DEFAULT NOW(),
+  updated_at timestamp NOT NULL DEFAULT NOW()
 );

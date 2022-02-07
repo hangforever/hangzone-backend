@@ -10,23 +10,23 @@ CREATE TABLE user_hangers (
   icon_url text,
   geography geography(point),
   current_hangzone_id integer REFERENCES hangzones,
-  created_at timestamp NOT NULL,
-  updated_at timestamp NOT NULL
+  created_at timestamp NOT NULL DEFAULT NOW(),
+  updated_at timestamp NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE friends (
   id serial PRIMARY KEY,
   user_hanger_id integer REFERENCES user_hangers NOT NULL,
   friend_user_hanger_id integer REFERENCES user_hangers NOT NULL,
-  created_at timestamp NOT NULL,
-  updated_at timestamp NOT NULL
+  created_at timestamp NOT NULL DEFAULT NOW(),
+  updated_at timestamp NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE request_hangs (
   id serial PRIMARY KEY,
   from_user_hanger_id integer REFERENCES user_hangers NOT NULL,
   to_user_hanger_id integer REFERENCES user_hangers NOT NULL,
-  created_at timestamp NOT NULL,
-  updated_at timestamp NOT NULL
+  created_at timestamp NOT NULL DEFAULT NOW(),
+  updated_at timestamp NOT NULL DEFAULT NOW()
 );
 
