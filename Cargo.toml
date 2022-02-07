@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 chrono = { version = "0.4.19", features = ["serde"] }
 dotenv = "0.15.0"
+geojson = "0.22.2"
 jsonwebtoken = "7.2.0"
 rand = "0.8.4"
 rocket = "0.4.10"
@@ -16,7 +17,8 @@ scrypt = { version = "0.8.1", default-features = true }
 serde = "1.0.134"
 serde_json = "1.0.76"
 slug = "0.1.4"
-sqlx = { version = "0.5.10", features = ['runtime-actix-native-tls'] }
+sqlx = { version = "0.5.10", features = ['runtime-tokio-native-tls', 'postgres'] }
+tokio = { version = "1", features = ["full"]}
 validator = "0.14.0"
 validator_derive = "0.14.0"
 
