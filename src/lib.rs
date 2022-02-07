@@ -17,6 +17,8 @@ use rocket_contrib::json::JsonValue;
 use rocket_cors::Cors;
 
 mod config;
+mod db;
+mod models;
 mod routes;
 
 #[catch(404)]
