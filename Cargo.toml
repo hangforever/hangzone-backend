@@ -11,8 +11,8 @@ dotenv = "0.15.0"
 geojson = "0.22.2"
 jsonwebtoken = "7.2.0"
 rand = "0.8.4"
-rocket = "0.4.10"
-rocket_cors = { version = "0.5.2", default-features = false }
+rocket = { version = "0.5.0-rc.1", default-features = false, features = ['json']}
+rocket_cors = { version = "0.6.0-alpha1", default-features = false }
 scrypt = { version = "0.8.1", default-features = true }
 serde = "1.0.134"
 serde_json = "1.0.76"
@@ -22,7 +22,8 @@ tokio = { version = "1", features = ["full"]}
 validator = "0.14.0"
 validator_derive = "0.14.0"
 
-[dependencies.rocket_contrib]
-version = "0.4.10"
-default-features = false
-features = ["json", "diesel_postgres_pool"]
+# https://rocket.rs/master/guide/upgrading-from-0.4/#contrib-deprecation/
+# [dependencies.rocket_contrib]
+# version = "0.4.10"
+# default-features = false
+# features = ["json", "diesel_postgres_pool"]
