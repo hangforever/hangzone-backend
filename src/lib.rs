@@ -1,12 +1,6 @@
-#![feature(proc_macro_hygiene, decl_macro)]
-
 #[macro_use]
 extern crate rocket;
-
-#[macro_use]
 extern crate sqlx;
-
-#[macro_use]
 extern crate validator_derive;
 
 use dotenv::dotenv;
@@ -30,16 +24,15 @@ fn cors_fairing() -> Cors {
 }
 
 #[launch]
-pub fn rocket() -> _ {
+pub async fn rocket() -> _ {
     dotenv().ok();
-    let pool = db::get_pool().await;
+    let pool = db::get_pool().await.unwrap();
 
     rocket::custom(config::from_env())
         .mount("/api", routes![routes::hangzones::get_hangzone])
         .manage::<PgPool>(pool)
-    // .attach(db::Conn::fairing())
-    // .attach(cors_fairing())
-    // .attach(config::AppState::manage())
+        .attach(cors_fairing())
+        .attach(config::AppState::manage())
 
     // Register not available in 0.5?
     // .register(catchers![not_found])

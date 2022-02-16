@@ -3,8 +3,9 @@ use std::env;
 
 pub mod hangzones;
 
-pub async fn get_pool() -> PgPool {
-    let database_url = env::var("DATABASE_URL")
-        .unwrap_or_default(String::from("DATABASE_URL=postgres://@localhost/hangzone"));
-    sqlx::PgPool::connect(database_url)
+pub async fn get_pool() -> Result<PgPool, sqlx::Error> {
+    let database_url =
+        env::var("DATABASE_URL").unwrap_or(String::from("postgres://@localhost/hangzone"));
+    println!("connecting with database url: {}", database_url);
+    sqlx::PgPool::connect(&database_url).await
 }

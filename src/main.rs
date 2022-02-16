@@ -1,5 +1,7 @@
 use hangzone_backend;
+use rocket;
 
-fn main() {
-    hangzone_backend::rocket().launch();
+#[rocket::main]
+async fn main() -> Result<(), rocket::Error> {
+    hangzone_backend::rocket().await.launch().await
 }
