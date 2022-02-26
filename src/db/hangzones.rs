@@ -26,6 +26,23 @@ pub async fn find_one(
     None
 }
 
+#[derive(FromForm)]
+pub struct FindHangzones {
+    search: Option<String>,
+    latlng: Option<(f32, f32)>,
+}
+
+pub async fn find(pool: &PgPool, params: FindHangzones) -> Vec<HangzoneJson> {
+    // TODO: support GPS coordinates with latlng
+
+    sqlx::query("SELECT * FROM hangzones WHERE name ILIKE $1 || '%'")
+        .bind(params.search)
+        .map(|row| row_to_hangzone_json(row))
+        .fetch_all(pool)
+        .await
+        .unwrap()
+}
+
 fn row_to_hangzone_json(row: sqlx::postgres::PgRow) -> HangzoneJson {
     HangzoneJson {
         id: row.get("id"),

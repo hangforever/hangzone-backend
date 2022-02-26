@@ -37,7 +37,13 @@ pub async fn rocket() -> _ {
     let pool = db::get_pool().await.unwrap();
 
     rocket::custom(config::from_env())
-        .mount("/api", routes![routes::hangzones::get_hangzone])
+        .mount(
+            "/api",
+            routes![
+                routes::hangzones::get_hangzone,
+                routes::hangzones::get_hangzones
+            ],
+        )
         .manage::<PgPool>(pool)
         .attach(cors_fairing())
         .attach(config::AppState::manage())
