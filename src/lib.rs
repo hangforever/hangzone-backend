@@ -1,11 +1,15 @@
 #[macro_use]
 extern crate rocket;
+use rocket::serde::json::{json, Value};
+
 extern crate sqlx;
 extern crate validator_derive;
 
+extern crate rocket_cors;
+use rocket_cors::{Cors, CorsOptions};
+
 use dotenv::dotenv;
 
-use rocket_cors::Cors;
 use sqlx::PgPool;
 
 mod config;
@@ -14,13 +18,17 @@ mod models;
 mod routes;
 
 #[catch(404)]
-fn not_found() -> String {
-    // TODO: make 404
-    String::new()
+fn not_found() -> Value {
+    json!({
+        "status": "error",
+        "reason": "Resource was not found."
+    })
 }
 
 fn cors_fairing() -> Cors {
-    Cors::from_options(&Default::default()).expect("Cors fairing cannot be created")
+    CorsOptions::default()
+        .to_cors()
+        .expect("Cors fairing cannot be created")
 }
 
 #[launch]
@@ -33,7 +41,5 @@ pub async fn rocket() -> _ {
         .manage::<PgPool>(pool)
         .attach(cors_fairing())
         .attach(config::AppState::manage())
-
-    // Register not available in 0.5?
-    // .register(catchers![not_found])
+        .register("/", catchers![not_found])
 }

@@ -13,7 +13,7 @@ Below is a tentative list of tools I plan to use
 
 ## General Project Structure
 
-As I don't really know what I'm doing, the general project structure will be based off of [this "realworld" example](https://github.com/TatriX/realworld-rust-rocket). In their words:
+The general project structure will be based off of [this "realworld" example](https://github.com/TatriX/realworld-rust-rocket). In their words:
 
 > This codebase was created to demonstrate a fully fledged fullstack application built with Rocket including CRUD operations, authentication, routing, pagination, and more.
 > 
