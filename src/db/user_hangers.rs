@@ -1,55 +1,33 @@
-use crate::models::user_hangers::UserHangerJson;
+use crate::models::user_hangers::{StatusHang, UserHangerJson};
+use rocket::serde::Deserialize;
 use sqlx::postgres::PgPool;
 use sqlx::Row;
 
-async fn find_one(
-    pool: &PgPool,
-    slug: Option<&str>,
-    user_hanger_id: Option<i32>,
-) -> Option<UserHangerJson> {
-    if let Some(s) = slug {
-        let row = sqlx::query("SELECT * FROM user_hangers WHERE slug = $1")
-            .bind(s)
-            .fetch_one(pool)
-            .await;
-        if let Ok(r) = row {
-            return Some(row_to_user_hanger_json(r));
-        }
-    }
-    if let Some(h_id) = user_hanger_id {
-        let row = sqlx::query("SELECT * FROM user_hangers WHERE id = $1")
-            .bind(h_id)
-            .fetch_one(pool)
-            .await;
-        if let Ok(r) = row {
-            return Some(row_to_user_hanger_json(r));
-        }
+pub async fn find_one(pool: &PgPool, user_hanger_id: i32) -> Option<UserHangerJson> {
+    let row = sqlx::query("SELECT * FROM user_hangers WHERE id = $1")
+        .bind(user_hanger_id)
+        .fetch_one(pool)
+        .await;
+    if let Ok(r) = row {
+        return Some(row_to_user_hanger_json(r));
     }
     None
 }
 
-#[derive(FromForm)]
-struct FindUserHangers {
-    search: Option<String>,
-    latlng: Option<(f32, f32)>,
+#[derive(Deserialize)]
+pub struct UserBody {
+    first_name: String,
+    last_name: String,
+    alias: String,
+    email_address: Option<String>,
+    status_hang: StatusHang,
+    status_description: Option<String>,
+    icon_url: Option<String>,
+    // geography: (f32, f32),
+    current_hangzone_id: Option<i32>,
 }
 
-async fn find(pool: &PgPool, params: FindUserHangers) -> Option<Vec<UserHangerJson>> {
-    // TODO: support GPS coordinates with latlng
-
-    if let Some(search) = params.search {
-        let user_hangers = sqlx::query("SELECT * FROM user_hangers WHERE name ILIKE $1 || '%'")
-            .bind(search)
-            .map(|row| row_to_user_hanger_json(row))
-            .fetch_all(pool)
-            .await;
-        match user_hangers {
-            Ok(user_hangers) => {
-                return Some(user_hangers);
-            }
-            Err(e) => eprintln!("{}", e),
-        }
-    }
+pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Option<UserHangerJson> {
     None
 }
 

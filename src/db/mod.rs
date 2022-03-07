@@ -2,6 +2,7 @@ use sqlx::PgPool;
 use std::env;
 
 pub mod hangzones;
+pub mod user_hangers;
 
 pub async fn get_pool() -> Result<PgPool, sqlx::Error> {
     let database_url =

@@ -1,21 +1,24 @@
-use crate::db;
-use rocket::serde::json::{json, Value};
+use crate::db::{self, user_hangers::UserBody};
+use rocket::serde::json::{json, Json, Value};
 use rocket::State;
 use sqlx::postgres::PgPool;
 
-#[get("users/<slug>")]
-pub async fn get_user(slug: String, pool: &State<PgPool>) -> Value {
-    let hangzone = db::hangzones::find_one(pool, Some(&slug), None).await;
+#[get("/users/<user_hanger_id>")]
+pub async fn get_user(user_hanger_id: i32, pool: &State<PgPool>) -> Value {
+    let user_hanger = db::user_hangers::find_one(pool, user_hanger_id).await;
 
-    if let Some(h) = hangzone {
-        return json!({ "hangzone": h });
+    if let Some(h) = user_hanger {
+        return json!({ "user_hanger": h });
     }
-    json!({ "hangzone": null })
+    json!({ "user_hanger": null })
 }
 
-#[get("users?<params..>")]
-pub async fn get_users(params: FindHangzones, pool: &State<PgPool>) -> Value {
-    let hangzones = db::hangzones::find(pool, params).await;
+#[post("/users", data = "<user_body>")]
+pub async fn create_user(user_body: Json<UserBody>, pool: &State<PgPool>) -> Value {
+    let user_hanger = db::user_hangers::create_one(pool, user_body.into_inner()).await;
 
-    json!({ "hangzones": hangzones })
+    if let Some(h) = user_hanger {
+        return json!({ "user_hanger": h });
+    }
+    json!({ "user_hanger": null })
 }

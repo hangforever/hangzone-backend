@@ -41,7 +41,8 @@ pub async fn rocket() -> _ {
             "/api",
             routes![
                 routes::hangzones::get_hangzone,
-                routes::hangzones::get_hangzones
+                routes::hangzones::get_hangzones,
+                routes::user_hangers::get_user,
             ],
         )
         .manage::<PgPool>(pool)
