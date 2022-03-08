@@ -1,4 +1,5 @@
 use crate::models::user_hangers::{StatusHang, UserHangerJson};
+use chrono::{DateTime, Utc};
 use rocket::serde::Deserialize;
 use sqlx::postgres::PgPool;
 use sqlx::Row;
@@ -14,7 +15,7 @@ pub async fn find_one(pool: &PgPool, user_hanger_id: i32) -> Option<UserHangerJs
     None
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct UserBody {
     first_name: String,
     last_name: String,
@@ -24,10 +25,39 @@ pub struct UserBody {
     status_description: Option<String>,
     icon_url: Option<String>,
     // geography: (f32, f32),
-    current_hangzone_id: Option<i32>,
+    // current_hangzone_id: Option<i32>,
 }
 
 pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Option<UserHangerJson> {
+    println!("{:?}", user_body);
+    let res = sqlx::query!(
+        "
+insert into user_hangers
+            (first_name,
+             last_name,
+             alias,
+             email_address,
+             status_hang,
+             status_description,
+             icon_url,
+             created_at,
+             updated_at)
+values      ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    ",
+        user_body.first_name,
+        user_body.last_name,
+        user_body.alias,
+        user_body.email_address,
+        0,
+        //user_body.status_hang as StatusHang,
+        user_body.status_description,
+        user_body.icon_url,
+        Utc::now(),
+        Utc::now(),
+    )
+    .fetch_one(pool)
+    .await;
+
     None
 }
 

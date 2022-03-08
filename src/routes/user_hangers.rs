@@ -1,4 +1,5 @@
-use crate::db::{self, user_hangers::UserBody};
+use crate::db;
+use crate::db::user_hangers::UserBody;
 use rocket::serde::json::{json, Json, Value};
 use rocket::State;
 use sqlx::postgres::PgPool;
