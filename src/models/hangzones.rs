@@ -34,6 +34,6 @@ pub struct HangzoneJson {
     // pub country: String,
     // pub postal_code: String,
     // pub geography: String,
-    // pub created_at: String,
-    // pub updated_at: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }

@@ -67,7 +67,7 @@ fn row_to_hangzone_json(row: sqlx::postgres::PgRow) -> HangzoneJson {
         // country: row.get("country"),
         // postal_code: row.get("postal_code"),
         // geography: row.get("geography"),
-        // created_at: row.get("created_at"),
-        // updated_at: row.get("updated_at"),
+        created_at: row.get("created_at"),
+        updated_at: row.get("updated_at"),
     }
 }
