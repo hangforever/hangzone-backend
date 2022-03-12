@@ -1,6 +1,6 @@
 use crate::db;
-use crate::db::hangzones::FindHangzones;
-use rocket::serde::json::{json, Value};
+use crate::db::hangzones::{FindHangzones, HangzoneBody};
+use rocket::serde::json::{json, Json, Value};
 use rocket::State;
 use sqlx::postgres::PgPool;
 
@@ -19,4 +19,14 @@ pub async fn get_hangzones(params: FindHangzones, pool: &State<PgPool>) -> Value
     let hangzones = db::hangzones::find(pool, params).await;
 
     json!({ "hangzones": hangzones })
+}
+
+#[post("/hangzones", data = "<hangzone_body>")]
+pub async fn create_hangzone(hangzone_body: Json<HangzoneBody>, pool: &State<PgPool>) -> Value {
+    let hangzone = db::hangzones::create_one(pool, hangzone_body.into_inner()).await;
+
+    if let Err(e) = hangzone {
+        eprintln!("Error creating hangzone: {}", e);
+    }
+    json!({ "hangzones": null })
 }

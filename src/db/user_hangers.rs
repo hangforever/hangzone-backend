@@ -29,7 +29,6 @@ pub struct UserBody {
 }
 
 pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Option<UserHangerJson> {
-    println!("{:?}", user_body);
     let res = sqlx::query!(
         "
 insert into user_hangers

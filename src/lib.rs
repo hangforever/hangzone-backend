@@ -42,6 +42,7 @@ pub async fn rocket() -> _ {
             routes![
                 routes::hangzones::get_hangzone,
                 routes::hangzones::get_hangzones,
+                routes::hangzones::create_hangzone,
                 routes::user_hangers::get_user,
                 routes::user_hangers::create_user,
             ],

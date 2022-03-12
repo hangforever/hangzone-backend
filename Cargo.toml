@@ -22,3 +22,4 @@ sqlx = { version = "0.5.10", features = ['runtime-tokio-native-tls',
 tokio = { version = "1", features = ["full"]}
 validator = "0.14.0"
 validator_derive = "0.14.0"
+wkb = "0.7.1"
