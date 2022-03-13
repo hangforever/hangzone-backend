@@ -11,3 +11,13 @@ pub async fn create_friend(user_hanger_id: i32, friend_id: i32, pool: &State<PgP
     }
     json!({ "ok": true })
 }
+
+#[get("/friends/<user_hanger_id>")]
+pub async fn get_friends(user_hanger_id: i32, pool: &State<PgPool>) -> Value {
+    let friends = db::friends::find(pool, user_hanger_id).await;
+    if let Some(friends) = friends {
+        return json!({ "friends": friends });
+    }
+
+    json!({ "friends": null })
+}
