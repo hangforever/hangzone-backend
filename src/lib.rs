@@ -45,6 +45,7 @@ pub async fn rocket() -> _ {
                 routes::hangzones::create_hangzone,
                 routes::user_hangers::get_user,
                 routes::user_hangers::create_user,
+                routes::friends::create_friend,
             ],
         )
         .manage::<PgPool>(pool)
