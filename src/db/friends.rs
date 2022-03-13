@@ -9,7 +9,7 @@ pub async fn create_one(
 ) -> Result<PgRow, sqlx::Error> {
     sqlx::query(
         "
-INSERT INTO hangzones
+INSERT INTO friends
  (user_hanger_id,
   friend_user_hanger_id,
   created_at, 
