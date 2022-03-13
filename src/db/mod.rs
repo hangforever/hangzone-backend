@@ -3,6 +3,7 @@ use std::env;
 
 pub mod friends;
 pub mod hangzones;
+pub mod pagination;
 pub mod user_hangers;
 
 pub async fn get_pool() -> Result<PgPool, sqlx::Error> {
