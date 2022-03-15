@@ -1,3 +1,4 @@
+use super::PaginationParams;
 use crate::db;
 use rocket::serde::json::{json, Value};
 use rocket::State;
@@ -12,9 +13,13 @@ pub async fn create_friend(user_hanger_id: i32, friend_id: i32, pool: &State<PgP
     json!({ "ok": true })
 }
 
-#[get("/friends/<user_hanger_id>?<page>")]
-pub async fn get_friends(user_hanger_id: i32, page: Option<i64>, pool: &State<PgPool>) -> Value {
-    let friends = db::friends::find(pool, user_hanger_id, page).await;
+#[get("/friends/<user_hanger_id>?<pagination_params..>")]
+pub async fn get_friends(
+    user_hanger_id: i32,
+    pagination_params: PaginationParams,
+    pool: &State<PgPool>,
+) -> Value {
+    let friends = db::friends::find(pool, user_hanger_id, pagination_params.page).await;
     if let Some(friends) = friends {
         return json!({ "friends": friends });
     }
