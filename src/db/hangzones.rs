@@ -1,3 +1,4 @@
+use super::pagination::Paginate;
 use crate::models::hangzones::Hangzone;
 use chrono::Utc;
 use rocket::serde::Deserialize;
@@ -30,17 +31,19 @@ pub async fn find_one(
     None
 }
 
-#[derive(FromForm)]
-pub struct FindHangzones {
+pub async fn find(
+    pool: &PgPool,
     search: Option<String>,
-    latlng: Option<(f32, f32)>,
-}
-
-pub async fn find(pool: &PgPool, params: FindHangzones) -> Option<Vec<Hangzone>> {
+    page: Option<i64>,
+) -> Option<Vec<Hangzone>> {
     // TODO: support GPS coordinates with latlng
 
-    if let Some(search) = params.search {
-        let hangzones = sqlx::query("SELECT * FROM hangzones WHERE name ILIKE $1 || '%'")
+    println!("{:?}", search);
+    if let Some(search) = search {
+        let page = page.unwrap_or(1);
+        let query = "SELECT * FROM hangzones WHERE name ILIKE $1 || '%'";
+        let pagination = query.paginate(page);
+        let hangzones = sqlx::query(&pagination.paginated_query())
             .bind(search)
             .map(|row| row_to_hangzone_json(row))
             .fetch_all(pool)

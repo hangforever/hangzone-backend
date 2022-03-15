@@ -1,5 +1,6 @@
+use super::PaginationParams;
 use crate::db;
-use crate::db::hangzones::{FindHangzones, HangzoneBody};
+use crate::db::hangzones::HangzoneBody;
 use rocket::serde::json::{json, Json, Value};
 use rocket::State;
 use sqlx::postgres::PgPool;
@@ -14,9 +15,13 @@ pub async fn get_hangzone(slug: String, pool: &State<PgPool>) -> Value {
     json!({ "hangzone": null })
 }
 
-#[get("/hangzones?<params..>")]
-pub async fn get_hangzones(params: FindHangzones, pool: &State<PgPool>) -> Value {
-    let hangzones = db::hangzones::find(pool, params).await;
+#[get("/hangzones?<search>&<pagination_params..>")]
+pub async fn get_hangzones(
+    search: Option<String>,
+    pagination_params: PaginationParams,
+    pool: &State<PgPool>,
+) -> Value {
+    let hangzones = db::hangzones::find(pool, search, pagination_params.page).await;
 
     json!({ "hangzones": hangzones })
 }
