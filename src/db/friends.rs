@@ -7,10 +7,14 @@ use sqlx::Row;
 pub async fn find(pool: &PgPool, user_hanger_id: i32, page: Option<i64>) -> Option<Vec<Friend>> {
     let page = page.unwrap_or(1);
     let query = "
-        SELECT * 
-        FROM user_hangers 
-        INNER JOIN friends ON user_hangers.id = friends.user_hanger_id
-        WHERE friends.user_hanger_id = $1 
+        SELECT *
+        FROM user_hangers
+        WHERE id IN (
+            SELECT friend_user_hanger_id 
+            FROM user_hangers 
+            INNER JOIN friends ON user_hangers.id = friends.user_hanger_id
+            WHERE friends.user_hanger_id = $1
+        ) 
     ";
     let pagination = query.paginate(page);
 
