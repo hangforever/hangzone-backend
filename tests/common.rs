@@ -1,4 +1,4 @@
-use rocket::local::asynchronous::{Client, LocalResponse};
+use rocket::{local::asynchronous::{Client, LocalResponse}, http::ContentType};
 
 pub const USERNAME: &'static str = "hangin_guy";
 pub const EMAIL: &'static str = "hangin_guy@protonmail.com";
@@ -24,4 +24,8 @@ fn login(client: &Client) -> Token {
 
 fn try_login(client: &Client) -> Option<Token> {
     None
+}
+
+fn register(client: &Client, username: &str, email: &str, password: &str) {
+        let response = client.post("/api/user_hangers").header(ContentType::JSON).body(json_string!(
 }

@@ -27,3 +27,9 @@ pub async fn get_friends(
 
     json!({ "friends": null })
 }
+
+#[delete("/friends?<friend_id>")]
+pub async fn delete_friend(auth: Auth, friend_id: i32, pool: &State<PgPool>) -> Value {
+    db::friends::delete_one(pool, auth.id, friend_id).await;
+    json!({ "ok": true })
+}

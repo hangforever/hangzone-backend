@@ -31,6 +31,7 @@ pub async fn find(pool: &PgPool, user_hanger_id: i32, page: Option<i64>) -> Opti
     }
     None
 }
+
 pub async fn create_one(
     pool: &PgPool,
     user_hanger_id: i32,
@@ -53,6 +54,27 @@ RETURNING id
     .bind(Utc::now())
     .fetch_one(pool)
     .await
+}
+
+pub async fn delete_one(
+    pool: &PgPool,
+    user_hanger_id: i32,
+    friend_id: i32,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "
+        DELETE FROM friends
+        WHERE user_hanger_id = $1 AND friend_user_hanger_id = $2
+        RETURNING id
+        ",
+        user_hanger_id,
+        friend_id
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|err| eprintln!("error deleting friend: {}", err))
+    .ok();
+    Ok(())
 }
 
 fn row_to_friend(row: sqlx::postgres::PgRow) -> Friend {
