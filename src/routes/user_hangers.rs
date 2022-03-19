@@ -1,3 +1,5 @@
+use crate::auth::Auth;
+use crate::auth::Auth;
 use crate::config::AppState;
 use crate::db;
 use crate::db::user_hangers::UserBody;
@@ -7,12 +9,26 @@ use rocket::State;
 use sqlx::postgres::PgPool;
 use sqlx::FromRow;
 
-#[post("/users", data = "<user_body>")]
-pub async fn register_user(user_body: Json<UserBody>, pool: &State<PgPool>) -> Value {
-    let user_hanger = db::user_hangers::create_one(pool, user_body.into_inner()).await;
-
+#[get("/users")]
+pub async fn get_user(auth: Auth, pool: &State<PgPool>, state: &State<AppState>) -> Value {
+    let user_hanger = db::user_hangers::find_one(pool, auth.id).await;
+    let secret = state.secret.clone();
     if let Ok(u) = user_hanger {
-        return json!({ "user_hanger": u });
+        return json!({ "user_hanger": u.to_user_auth(&secret) });
+    }
+    json!({ "user_hanger": null })
+}
+
+#[post("/users", data = "<user_body>")]
+pub async fn register_user(
+    user_body: Json<UserBody>,
+    pool: &State<PgPool>,
+    state: &State<AppState>,
+) -> Value {
+    let user_hanger = db::user_hangers::create_one(pool, user_body.into_inner()).await;
+    let secret = state.secret.clone();
+    if let Ok(u) = user_hanger {
+        return json!({ "user_hanger": u.to_user_auth(&secret) });
     }
     json!({ "user_hanger": null })
 }
@@ -28,7 +44,7 @@ struct LoginUserData {
     password: String,
 }
 
-#[post("/login", data = "<login_user>")]
+#[post("/users/login", data = "<login_user>")]
 pub async fn post_login(
     login_user: Json<LoginUser>,
     pool: &State<PgPool>,
@@ -43,3 +59,5 @@ pub async fn post_login(
     }
     json!({ "user_hanger": null })
 }
+
+// TODO: update user
