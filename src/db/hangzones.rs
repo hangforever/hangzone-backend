@@ -27,9 +27,11 @@ pub async fn find_one(
     hangzone_id: Option<i32>,
 ) -> Option<Hangzone> {
     if let Some(s) = slug {
-        let hangzone = sqlx::query("SELECT * FROM hangzones WHERE slug = $1")
-            .bind(s)
-            .map(|row| row_to_hangzone_json(row))
+        let hangzone = sqlx::query_as!(
+                Hangzone,
+                "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, postal_code, state, created_at, updated_at FROM hangzones WHERE slug = $1",
+                s
+            )
             .fetch_one(pool)
             .await;
         if let Ok(hangzone) = hangzone {
@@ -37,9 +39,7 @@ pub async fn find_one(
         }
     }
     if let Some(h_id) = hangzone_id {
-        let hangzone = sqlx::query("SELECT * FROM hangzones WHERE id = $1")
-            .bind(h_id)
-            .map(|row| row_to_hangzone_json(row))
+        let hangzone = sqlx::query_as!(Hangzone, "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, postal_code, state, created_at, updated_at FROM hangzones WHERE id = $1", h_id)
             .fetch_one(pool)
             .await;
         if let Ok(hangzone) = hangzone {
@@ -128,9 +128,9 @@ fn row_to_hangzone_json(row: sqlx::postgres::PgRow) -> Hangzone {
         address_2: row.get("address_2"),
         address_3: row.get("address_3"),
         city: row.get("city"),
-        // state: row.get("state"),
-        // country: row.get("country"),
-        // postal_code: row.get("postal_code"),
+        state: row.get("state"),
+        country: row.get("country"),
+        postal_code: row.get("postal_code"),
         // geography: row.get("geography"),
         created_at: row.get("created_at"),
         updated_at: row.get("updated_at"),
