@@ -1,4 +1,4 @@
-use crate::models::user_hangers::{StatusHang, UserHangerJson};
+use crate::models::user_hangers::{StatusHang, UserHanger};
 use chrono::{DateTime, Utc};
 use rocket::serde::Deserialize;
 use scrypt::{
@@ -15,7 +15,7 @@ pub struct UserBody {
     password: String,
 }
 
-pub async fn find_one(pool: &PgPool, user_hanger_id: i32) -> Result<UserHangerJson, sqlx::Error> {
+pub async fn find_one(pool: &PgPool, user_hanger_id: i32) -> Result<UserHanger, sqlx::Error> {
     sqlx::query("SELECT * FROM user_hangers WHERE id = $1")
         .bind(user_hanger_id)
         .map(|row| row_to_user_hanger_json(row))
@@ -23,7 +23,7 @@ pub async fn find_one(pool: &PgPool, user_hanger_id: i32) -> Result<UserHangerJs
         .await
 }
 
-pub async fn find(pool: &PgPool, hangzone_slug: &str) -> Result<Vec<UserHangerJson>, sqlx::Error> {
+pub async fn find(pool: &PgPool, hangzone_slug: &str) -> Result<Vec<UserHanger>, sqlx::Error> {
     sqlx::query("SELECT * FROM user_hangers INNER JOIN hangzones ON user_hangers.current_hangzone_id = hangzones.id WHERE hangzones.slug = $1")
         .bind(hangzone_slug)
         .map(|row| row_to_user_hanger_json(row))
@@ -47,9 +47,10 @@ insert into user_hangers
              status_hang,
              status_description,
              icon_url,
+             hash,
              created_at,
              updated_at)
-values      ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+values      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     ",
         "Anonymous".to_string(),
         "Hanger".to_string(),
@@ -60,6 +61,7 @@ values      ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         "No description".to_string(),
         // TODO: Have a default icon
         String::new(),
+        hash,
         Utc::now(),
         Utc::now(),
     )
@@ -68,8 +70,12 @@ values      ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     Ok(())
 }
 
-pub fn row_to_user_hanger_json(row: sqlx::postgres::PgRow) -> UserHangerJson {
-    UserHangerJson {
+pub async fn login(pool: &PgPool) -> Option<UserHanger> {
+    None
+}
+
+pub fn row_to_user_hanger_json(row: sqlx::postgres::PgRow) -> UserHanger {
+    UserHanger {
         id: row.get("id"),
         first_name: row.get("first_name"),
         last_name: row.get("last_name"),

@@ -11,12 +11,13 @@ pub async fn get_hangzone(slug: String, pool: &State<PgPool>) -> Value {
 
     if let Some(hangzone) = hangzone {
         let res = db::user_hangers::find(pool, &slug).await.map_err(|err| {
-            eprint!("Couldn't get users: {}", err);
+            eprint!("Couldn't get user profiles: {}", err);
         });
         if let Ok(user_hangers) = res {
+            let profiles: Vec<_> = user_hangers.iter().map(|uh| uh.to_profile()).collect();
             return json!({
                 "hangzone": hangzone,
-                "user_hangers": user_hangers,
+                "profiles": profiles,
             });
         }
     }
