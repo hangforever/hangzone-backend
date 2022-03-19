@@ -13,7 +13,7 @@ use dotenv::dotenv;
 use sqlx::PgPool;
 
 mod config;
-mod db;
+pub mod db;
 mod models;
 mod routes;
 

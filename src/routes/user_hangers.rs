@@ -8,7 +8,7 @@ use sqlx::postgres::PgPool;
 pub async fn get_user(user_hanger_id: i32, pool: &State<PgPool>) -> Value {
     let user_hanger = db::user_hangers::find_one(pool, user_hanger_id).await;
 
-    if let Some(h) = user_hanger {
+    if let Ok(h) = user_hanger {
         return json!({ "user_hanger": h });
     }
     json!({ "user_hanger": null })
@@ -18,7 +18,7 @@ pub async fn get_user(user_hanger_id: i32, pool: &State<PgPool>) -> Value {
 pub async fn create_user(user_body: Json<UserBody>, pool: &State<PgPool>) -> Value {
     let user_hanger = db::user_hangers::create_one(pool, user_body.into_inner()).await;
 
-    if let Some(u) = user_hanger {
+    if let Ok(u) = user_hanger {
         return json!({ "user_hanger": u });
     }
     json!({ "user_hanger": null })

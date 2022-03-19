@@ -4,17 +4,6 @@ use rocket::serde::Deserialize;
 use sqlx::postgres::PgPool;
 use sqlx::Row;
 
-pub async fn find_one(pool: &PgPool, user_hanger_id: i32) -> Option<UserHangerJson> {
-    let row = sqlx::query("SELECT * FROM user_hangers WHERE id = $1")
-        .bind(user_hanger_id)
-        .fetch_one(pool)
-        .await;
-    if let Ok(r) = row {
-        return Some(row_to_user_hanger_json(r));
-    }
-    None
-}
-
 #[derive(Deserialize, Debug)]
 pub struct UserBody {
     first_name: String,
@@ -28,8 +17,24 @@ pub struct UserBody {
     // current_hangzone_id: Option<i32>,
 }
 
-pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Option<UserHangerJson> {
-    let res = sqlx::query!(
+pub async fn find_one(pool: &PgPool, user_hanger_id: i32) -> Result<UserHangerJson, sqlx::Error> {
+    sqlx::query("SELECT * FROM user_hangers WHERE id = $1")
+        .bind(user_hanger_id)
+        .map(|row| row_to_user_hanger_json(row))
+        .fetch_one(pool)
+        .await
+}
+
+pub async fn find(pool: &PgPool, hangzone_slug: &str) -> Result<Vec<UserHangerJson>, sqlx::Error> {
+    sqlx::query("SELECT * FROM user_hangers INNER JOIN hangzones ON user_hangers.current_hangzone_id = hangzones.id WHERE hangzones.slug = $1")
+        .bind(hangzone_slug)
+        .map(|row| row_to_user_hanger_json(row))
+        .fetch_all(pool)
+        .await
+}
+
+pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Result<(), sqlx::Error> {
+    sqlx::query!(
         "
 insert into user_hangers
             (first_name,
@@ -55,12 +60,11 @@ values      ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         Utc::now(),
     )
     .fetch_one(pool)
-    .await;
-
-    None
+    .await?;
+    Ok(())
 }
 
-fn row_to_user_hanger_json(row: sqlx::postgres::PgRow) -> UserHangerJson {
+pub fn row_to_user_hanger_json(row: sqlx::postgres::PgRow) -> UserHangerJson {
     UserHangerJson {
         id: row.get("id"),
         first_name: row.get("first_name"),

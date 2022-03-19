@@ -9,8 +9,16 @@ use sqlx::postgres::PgPool;
 pub async fn get_hangzone(slug: String, pool: &State<PgPool>) -> Value {
     let hangzone = db::hangzones::find_one(pool, Some(&slug), None).await;
 
-    if let Some(h) = hangzone {
-        return json!({ "hangzone": h });
+    if let Some(hangzone) = hangzone {
+        let res = db::user_hangers::find(pool, &slug).await.map_err(|err| {
+            eprint!("Couldn't get users: {}", err);
+        });
+        if let Ok(user_hangers) = res {
+            return json!({
+                "hangzone": hangzone,
+                "user_hangers": user_hangers,
+            });
+        }
     }
     json!({ "hangzone": null })
 }

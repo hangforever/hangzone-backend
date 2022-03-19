@@ -1,9 +1,25 @@
 use super::pagination::Paginate;
+use super::user_hangers::row_to_user_hanger_json;
 use crate::models::hangzones::Hangzone;
 use chrono::Utc;
 use rocket::serde::Deserialize;
 use sqlx::postgres::PgPool;
 use sqlx::Row;
+
+#[derive(Deserialize, Debug)]
+pub struct HangzoneBody {
+    pub name: String,
+    pub description: Option<String>,
+    pub address_1: String,
+    pub address_2: Option<String>,
+    pub address_3: Option<String>,
+    pub city: String,
+    pub state: Option<String>,
+    pub country: String,
+    pub postal_code: Option<String>,
+    pub lat: f64,
+    pub lng: f64,
+}
 
 pub async fn find_one(
     pool: &PgPool,
@@ -11,21 +27,23 @@ pub async fn find_one(
     hangzone_id: Option<i32>,
 ) -> Option<Hangzone> {
     if let Some(s) = slug {
-        let row = sqlx::query("SELECT * FROM hangzones WHERE slug = $1")
+        let hangzone = sqlx::query("SELECT * FROM hangzones WHERE slug = $1")
             .bind(s)
+            .map(|row| row_to_hangzone_json(row))
             .fetch_one(pool)
             .await;
-        if let Ok(r) = row {
-            return Some(row_to_hangzone_json(r));
+        if let Ok(hangzone) = hangzone {
+            return Some(hangzone);
         }
     }
     if let Some(h_id) = hangzone_id {
-        let row = sqlx::query("SELECT * FROM hangzones WHERE id = $1")
+        let hangzone = sqlx::query("SELECT * FROM hangzones WHERE id = $1")
             .bind(h_id)
+            .map(|row| row_to_hangzone_json(row))
             .fetch_one(pool)
             .await;
-        if let Ok(r) = row {
-            return Some(row_to_hangzone_json(r));
+        if let Ok(hangzone) = hangzone {
+            return Some(hangzone);
         }
     }
     None
@@ -38,7 +56,6 @@ pub async fn find(
 ) -> Option<Vec<Hangzone>> {
     // TODO: support GPS coordinates with latlng
 
-    println!("{:?}", search);
     if let Some(search) = search {
         let page = page.unwrap_or(1);
         let query = "SELECT * FROM hangzones WHERE name ILIKE $1 || '%'";
@@ -56,21 +73,6 @@ pub async fn find(
         }
     }
     None
-}
-
-#[derive(Deserialize, Debug)]
-pub struct HangzoneBody {
-    name: String,
-    description: Option<String>,
-    address_1: String,
-    address_2: Option<String>,
-    address_3: Option<String>,
-    city: String,
-    state: Option<String>,
-    country: String,
-    postal_code: Option<String>,
-    lat: f64,
-    lng: f64,
 }
 
 pub async fn create_one(
