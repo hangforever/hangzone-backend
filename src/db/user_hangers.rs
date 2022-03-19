@@ -39,18 +39,18 @@ pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Result<(), sqlx::
         .to_string();
     sqlx::query!(
         "
-insert into user_hangers
-            (first_name,
-             last_name,
-             alias,
-             email_address,
-             status_hang,
-             status_description,
-             icon_url,
-             hash,
-             created_at,
-             updated_at)
-values      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        INSERT INTO user_hangers
+                    (first_name,
+                     last_name,
+                     alias,
+                     email_address,
+                     status_hang,
+                     status_description,
+                     icon_url,
+                     hash,
+                     created_at,
+                     updated_at)
+        VALUES      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     ",
         "Anonymous".to_string(),
         "Hanger".to_string(),
@@ -66,7 +66,9 @@ values      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         Utc::now(),
     )
     .fetch_one(pool)
-    .await?;
+    .await
+    .map_err(|err| eprintln!("Couldn't create user: {}", err))
+    .ok();
     Ok(())
 }
 

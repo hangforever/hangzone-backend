@@ -18,7 +18,7 @@ pub async fn get_user(user_hanger_id: i32, pool: &State<PgPool>) -> Value {
 }
 
 #[post("/users", data = "<user_body>")]
-pub async fn create_user(user_body: Json<UserBody>, pool: &State<PgPool>) -> Value {
+pub async fn register_user(user_body: Json<UserBody>, pool: &State<PgPool>) -> Value {
     let user_hanger = db::user_hangers::create_one(pool, user_body.into_inner()).await;
 
     if let Ok(u) = user_hanger {
