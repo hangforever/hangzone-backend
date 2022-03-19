@@ -8,6 +8,7 @@ CREATE TABLE user_hangers (
   status_hang integer NOT NULL,
   status_description text,
   icon_url text,
+  hash text NOT NULL,
   geography geography(point),
   current_hangzone_id integer REFERENCES hangzones,
   created_at timestamptz NOT NULL DEFAULT NOW(),

@@ -1,20 +1,18 @@
 use crate::models::user_hangers::{StatusHang, UserHangerJson};
 use chrono::{DateTime, Utc};
 use rocket::serde::Deserialize;
+use scrypt::{
+    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    Scrypt,
+};
 use sqlx::postgres::PgPool;
 use sqlx::Row;
 
 #[derive(Deserialize, Debug)]
 pub struct UserBody {
-    first_name: String,
-    last_name: String,
     alias: String,
-    email_address: Option<String>,
-    status_hang: StatusHang,
-    status_description: Option<String>,
-    icon_url: Option<String>,
-    // geography: (f32, f32),
-    // current_hangzone_id: Option<i32>,
+    email_address: String,
+    password: String,
 }
 
 pub async fn find_one(pool: &PgPool, user_hanger_id: i32) -> Result<UserHangerJson, sqlx::Error> {
@@ -34,6 +32,11 @@ pub async fn find(pool: &PgPool, hangzone_slug: &str) -> Result<Vec<UserHangerJs
 }
 
 pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Result<(), sqlx::Error> {
+    let salt = SaltString::generate(&mut OsRng);
+    let hash = Scrypt
+        .hash_password(user_body.password.as_bytes(), &salt)
+        .expect("hashing error")
+        .to_string();
     sqlx::query!(
         "
 insert into user_hangers
@@ -48,14 +51,15 @@ insert into user_hangers
              updated_at)
 values      ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     ",
-        user_body.first_name,
-        user_body.last_name,
+        "Anonymous".to_string(),
+        "Hanger".to_string(),
         user_body.alias,
         user_body.email_address,
         0,
         //user_body.status_hang as StatusHang,
-        user_body.status_description,
-        user_body.icon_url,
+        "No description".to_string(),
+        // TODO: Have a default icon
+        String::new(),
         Utc::now(),
         Utc::now(),
     )
