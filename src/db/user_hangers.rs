@@ -31,14 +31,15 @@ pub async fn find(pool: &PgPool, hangzone_slug: &str) -> Result<Vec<UserHanger>,
         .await
 }
 
-pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Result<(), sqlx::Error> {
+pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Result<UserHanger, sqlx::Error> {
     let salt = SaltString::generate(&mut OsRng);
     let hash = Scrypt
         .hash_password(user_body.password.as_bytes(), &salt)
         .expect("hashing error")
         .to_string();
-    sqlx::query!(
-        "
+    sqlx::query_as!(
+        UserHanger,
+        r#"
         INSERT INTO user_hangers
                     (first_name,
                      last_name,
@@ -51,7 +52,8 @@ pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Result<(), sqlx::
                      created_at,
                      updated_at)
         VALUES      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-    ",
+        RETURNING id, first_name, last_name, alias, email_address, status_hang as "status_hang!: StatusHang", status_description, icon_url, hash, current_hangzone_id, created_at, updated_at
+    "#,
         "Anonymous".to_string(),
         "Hanger".to_string(),
         user_body.alias,
@@ -67,9 +69,6 @@ pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Result<(), sqlx::
     )
     .fetch_one(pool)
     .await
-    .map_err(|err| eprintln!("Couldn't create user: {}", err))
-    .ok();
-    Ok(())
 }
 
 pub async fn login(pool: &PgPool, email: &str, password: &str) -> Option<UserHanger> {

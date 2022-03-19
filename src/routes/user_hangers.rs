@@ -1,5 +1,4 @@
 use crate::auth::Auth;
-use crate::auth::Auth;
 use crate::config::AppState;
 use crate::db;
 use crate::db::user_hangers::UserBody;
