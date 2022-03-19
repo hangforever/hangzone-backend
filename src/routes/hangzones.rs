@@ -1,4 +1,5 @@
 use super::PaginationParams;
+use crate::auth::Auth;
 use crate::db;
 use crate::db::hangzones::HangzoneBody;
 use rocket::serde::json::{json, Json, Value};
@@ -36,7 +37,11 @@ pub async fn get_hangzones(
 }
 
 #[post("/hangzones", data = "<hangzone_body>")]
-pub async fn create_hangzone(hangzone_body: Json<HangzoneBody>, pool: &State<PgPool>) -> Value {
+pub async fn create_hangzone(
+    auth: Auth,
+    hangzone_body: Json<HangzoneBody>,
+    pool: &State<PgPool>,
+) -> Value {
     let hangzone = db::hangzones::create_one(pool, hangzone_body.into_inner()).await;
 
     if let Err(e) = hangzone {
