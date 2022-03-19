@@ -15,7 +15,7 @@ pub struct Auth {
     pub exp: i64,
     /// user id
     pub id: i32,
-    pub username: String,
+    pub alias: String,
 }
 
 impl Auth {

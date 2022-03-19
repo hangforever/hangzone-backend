@@ -70,7 +70,22 @@ values      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     Ok(())
 }
 
-pub async fn login(pool: &PgPool) -> Option<UserHanger> {
+pub async fn login(pool: &PgPool, email: &str, password: &str) -> Option<UserHanger> {
+    let user_hanger = sqlx::query("SELECT * FROM user_hangers WHERE email_address = $1")
+        .bind(email)
+        .map(|row| row_to_user_hanger_json(row))
+        .fetch_one(pool)
+        .await;
+    if let Ok(user_hanger) = user_hanger {
+        let parsed_hash = PasswordHash::new(&user_hanger.hash).unwrap();
+        let password_match = Scrypt
+            .verify_password(password.as_bytes(), &parsed_hash)
+            .map_err(|e| eprintln!("login_user: scrypt_check: {}", e))
+            .is_ok();
+        if password_match {
+            return Some(user_hanger);
+        }
+    }
     None
 }
 
@@ -85,6 +100,7 @@ pub fn row_to_user_hanger_json(row: sqlx::postgres::PgRow) -> UserHanger {
         status_description: row.get("status_description"),
         icon_url: row.get("icon_url"),
         current_hangzone_id: row.get("current_hangzone_id"),
+        hash: row.get("hash"),
         created_at: row.get("created_at"),
         updated_at: row.get("updated_at"),
     }

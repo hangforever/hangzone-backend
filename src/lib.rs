@@ -12,6 +12,7 @@ use dotenv::dotenv;
 
 use sqlx::PgPool;
 
+mod auth;
 mod config;
 pub mod db;
 mod models;
@@ -44,6 +45,7 @@ pub async fn rocket() -> _ {
                 routes::hangzones::get_hangzones,
                 routes::hangzones::create_hangzone,
                 routes::user_hangers::get_user,
+                routes::user_hangers::post_login,
                 routes::user_hangers::create_user,
                 routes::friends::create_friend,
                 routes::friends::get_friends,

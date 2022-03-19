@@ -1,4 +1,5 @@
-use chrono::{DateTime, Utc};
+use crate::auth::Auth;
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
@@ -21,6 +22,7 @@ pub struct UserHanger {
     pub status_hang: StatusHang,
     pub status_description: Option<String>,
     pub icon_url: Option<String>,
+    pub hash: String,
     // pub geography: (f32, f32),
     pub current_hangzone_id: Option<i32>,
     pub created_at: DateTime<Utc>,
@@ -49,7 +51,14 @@ pub struct Profile<'a> {
 }
 
 impl UserHanger {
-    pub fn to_user_auth(&self, token: String) -> UserHangerAuth {
+    pub fn to_user_auth(&self, secret: &[u8]) -> UserHangerAuth {
+        let exp = Utc::now() + Duration::days(60);
+        let token = Auth {
+            id: self.id,
+            alias: self.alias.clone(),
+            exp: exp.timestamp(),
+        }
+        .token(secret);
         UserHangerAuth {
             id: self.id,
             first_name: &self.first_name,

@@ -1,3 +1,4 @@
+use crate::config::AppState;
 use crate::db;
 use crate::db::user_hangers::UserBody;
 use rocket::serde::json::{json, Json, Value};
@@ -28,16 +29,27 @@ pub async fn create_user(user_body: Json<UserBody>, pool: &State<PgPool>) -> Val
 
 #[derive(Deserialize)]
 pub struct LoginUser {
-    user: LoginUserData,
+    user_hanger: LoginUserData,
 }
 
 #[derive(Deserialize)]
 struct LoginUserData {
-    email: Option<String>,
-    password: Option<String>,
+    email: String,
+    password: String,
 }
 
 #[post("/login", data = "<login_user>")]
-pub async fn login(login_user: Json<LoginUser>, pool: &State<PgPool>) -> Value {
-    json!({ "msg": "unimplemented" })
+pub async fn post_login(
+    login_user: Json<LoginUser>,
+    pool: &State<PgPool>,
+    state: &State<AppState>,
+) -> Value {
+    let login_user = login_user.into_inner().user_hanger;
+    let secret = state.secret.clone();
+
+    let user_hanger = db::user_hangers::login(pool, &login_user.email, &login_user.password).await;
+    if let Some(user_hanger) = user_hanger {
+        return json!({ "user_hanger": user_hanger.to_user_auth(&secret) });
+    }
+    json!({ "user_hanger": null })
 }
