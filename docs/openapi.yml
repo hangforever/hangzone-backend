@@ -168,22 +168,22 @@ paths:
     post:
       tags:
         - Hangzones
-      summary: Create a comment for an article
-      description: Create a comment for an article. Auth is required
-      operationId: CreateArticleComment
+      summary: Create a hangzone for an article
+      description: Create a hangzone for an article. Auth is required
+      operationId: CreateArticleHangzone
       parameters:
         - name: slug
           in: query
-          description: Slug of the article that you want to create a comment for
+          description: Slug of the article that you want to create a hangzone for
           required: true
           schema:
             type: string
       requestBody:
-        description: Comment you want to create
+        description: Hangzone you want to create
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewCommentRequest'
+              $ref: '#/components/schemas/NewHangzoneRequest'
         required: true
       responses:
         200:
@@ -191,7 +191,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SingleCommentResponse'
+                $ref: '#/components/schemas/SingleHangzoneResponse'
         401:
           description: Unauthorized
           content: {}
@@ -203,7 +203,7 @@ paths:
                 $ref: '#/components/schemas/GenericErrorModel'
       security:
         - Token: []
-      x-codegen-request-body-name: comment
+      x-codegen-request-body-name: hangzone
 components:
   schemas:
     LoginUserHanger:
@@ -247,26 +247,35 @@ components:
           $ref: '#/components/schemas/NewUser'
     UserHanger:
       required:
-        - status_description
-        - email
-        - image
-        - token
+        - id
+        - first_name
+        - last_name
         - alias
+        - status_hang
+        - token
       type: object
       properties:
-        email:
+        id:
+          type: number
+        first_name:
           type: string
-        token:
+        last_name:
           type: string
         alias:
           type: string
+        email_address:
+          type: string
+        status_hang:
+          type: string
         status_description:
           type: string
-        image:
+        icon_url:
+          type: string
+        token:
           type: string
     UserResponse:
       required:
-        - user
+        - user_hanger
       type: object
       properties:
         user_hanger:
@@ -300,9 +309,6 @@ components:
           $ref: '#/components/schemas/Profile'
     Profile:
       required:
-        - status_description
-        - following
-        - image
         - alias
       type: object
       properties:
@@ -310,167 +316,78 @@ components:
           type: string
         status_description:
           type: string
-        image:
+        icon_url:
           type: string
-        following:
-          type: boolean
-    Article:
+    Hangzone:
       required:
-        - author
-        - body
-        - createdAt
-        - description
-        - favorited
-        - favoritesCount
-        - slug
-        - tagList
-        - title
-        - updatedAt
-      type: object
-      properties:
-        slug:
-          type: string
-        title:
-          type: string
-        description:
-          type: string
-        body:
-          type: string
-        tagList:
-          type: array
-          items:
-            type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        favorited:
-          type: boolean
-        favoritesCount:
-          type: integer
-        author:
-          $ref: '#/components/schemas/Profile'
-    SingleArticleResponse:
-      required:
-        - article
-      type: object
-      properties:
-        article:
-          $ref: '#/components/schemas/Article'
-    MultipleArticlesResponse:
-      required:
-        - articles
-        - articlesCount
-      type: object
-      properties:
-        articles:
-          type: array
-          items:
-            $ref: '#/components/schemas/Article'
-        articlesCount:
-          type: integer
-    NewArticle:
-      required:
-        - body
-        - description
-        - title
-      type: object
-      properties:
-        title:
-          type: string
-        description:
-          type: string
-        body:
-          type: string
-        tagList:
-          type: array
-          items:
-            type: string
-    NewArticleRequest:
-      required:
-        - article
-      type: object
-      properties:
-        article:
-          $ref: '#/components/schemas/NewArticle'
-    UpdateArticle:
-      type: object
-      properties:
-        title:
-          type: string
-        description:
-          type: string
-        body:
-          type: string
-    UpdateArticleRequest:
-      required:
-        - article
-      type: object
-      properties:
-        article:
-          $ref: '#/components/schemas/UpdateArticle'
-    Comment:
-      required:
-        - author
-        - body
-        - createdAt
         - id
+        - slug
+        - name
+        - address1
+        - city
+        - country
+        - createdAt
         - updatedAt
       type: object
       properties:
         id:
           type: integer
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        address1:
+          type: string
+        address2:
+          type: string
+        address3:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        postalCode:
+          type: string
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
-        body:
-          type: string
-        author:
-          $ref: '#/components/schemas/Profile'
-    SingleCommentResponse:
+    SingleHangzoneResponse:
       required:
-        - comment
+        - hangzone
       type: object
       properties:
-        comment:
-          $ref: '#/components/schemas/Comment'
+        hangzone:
+          $ref: '#/components/schemas/Hangzone'
     MultipleHangzonesResponse:
       required:
-        - comments
+        - hangzones
       type: object
       properties:
-        comments:
+        hangzones:
           type: array
           items:
-            $ref: '#/components/schemas/Comment'
-    NewComment:
+            $ref: '#/components/schemas/Hangzone'
+    NewHangzone:
       required:
         - body
       type: object
       properties:
         body:
           type: string
-    NewCommentRequest:
+    NewHangzoneRequest:
       required:
-        - comment
+        - hangzone
       type: object
       properties:
-        comment:
-          $ref: '#/components/schemas/NewComment'
-    TagsResponse:
-      required:
-        - tags
-      type: object
-      properties:
-        tags:
-          type: array
-          items:
-            type: string
+        hangzone:
+          $ref: '#/components/schemas/NewHangzone'
     GenericErrorModel:
       required:
         - errors
