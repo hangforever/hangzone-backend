@@ -168,9 +168,9 @@ paths:
     post:
       tags:
         - Hangzones
-      summary: Create a hangzone for an article
-      description: Create a hangzone for an article. Auth is required
-      operationId: CreateArticleHangzone
+      summary: Create a hangzone
+      description: Create a hangzone. Auth is required
+      operationId: CreateHangzone
       parameters:
         - name: slug
           in: query
@@ -185,6 +185,36 @@ paths:
             schema:
               $ref: '#/components/schemas/NewHangzoneRequest'
         required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleHangzoneResponse'
+        401:
+          description: Unauthorized
+          content: {}
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+  /hangzones/{slug}:
+    get:
+      tags:
+        - Hangzones
+      summary: Get Hangzone
+      description: Get hangzones by slug. Auth is optional
+      operationId: GetHangzone
+      parameters:
+        - name: slug
+          in: path
+          description: Slug of the hangzone
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: OK

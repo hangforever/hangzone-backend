@@ -6,25 +6,6 @@ use rocket::serde::json::{json, Json, Value};
 use rocket::State;
 use sqlx::postgres::PgPool;
 
-#[get("/hangzones/<slug>")]
-pub async fn get_hangzone(slug: String, pool: &State<PgPool>) -> Value {
-    let hangzone = db::hangzones::find_one(pool, Some(&slug), None).await;
-
-    if let Some(hangzone) = hangzone {
-        let res = db::user_hangers::find(pool, &slug).await.map_err(|err| {
-            eprint!("Couldn't get user profiles: {}", err);
-        });
-        if let Ok(user_hangers) = res {
-            let profiles: Vec<_> = user_hangers.iter().map(|uh| uh.to_profile()).collect();
-            return json!({
-                "hangzone": hangzone,
-                "profiles": profiles,
-            });
-        }
-    }
-    json!({ "hangzone": null })
-}
-
 #[get("/hangzones?<search>&<pagination_params..>")]
 pub async fn get_hangzones(
     search: Option<String>,
@@ -48,4 +29,23 @@ pub async fn create_hangzone(
         eprintln!("Error creating hangzone: {}", e);
     }
     json!({ "hangzones": null })
+}
+
+#[get("/hangzones/<slug>")]
+pub async fn get_hangzone(slug: String, pool: &State<PgPool>) -> Value {
+    let hangzone = db::hangzones::find_one(pool, Some(&slug), None).await;
+
+    if let Some(hangzone) = hangzone {
+        let res = db::user_hangers::find(pool, &slug).await.map_err(|err| {
+            eprint!("Couldn't get user profiles: {}", err);
+        });
+        if let Ok(user_hangers) = res {
+            let profiles: Vec<_> = user_hangers.iter().map(|uh| uh.to_profile()).collect();
+            return json!({
+                "hangzone": hangzone,
+                "profiles": profiles,
+            });
+        }
+    }
+    json!({ "hangzone": null })
 }
