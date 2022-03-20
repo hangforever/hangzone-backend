@@ -35,7 +35,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserResponse'
         401:
-          description: Unauthorized
+          description: 'Not Implemented! - Unauthorized'
           content: {}
         422:
           description: Unexpected error
@@ -60,7 +60,7 @@ paths:
         required: true
       responses:
         201:
-          description: OK
+          description: Not implemented! - OK
           content:
             application/json:
               schema:
@@ -72,7 +72,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericErrorModel'
       x-codegen-request-body-name: body
-  /user:
+  /users:
     get:
       tags:
         - User and Authentication
@@ -101,7 +101,7 @@ paths:
       tags:
         - User and Authentication
       summary: Update current user
-      description: Updated user information for current user
+      description: Not implemented! - Updated user information for current user
       operationId: UpdateCurrentUser
       requestBody:
         description: User details to update. At least **one** field is required.
@@ -129,18 +129,24 @@ paths:
       security:
         - Token: []
       x-codegen-request-body-name: body
-  /articles/{slug}/comments:
+  /hangzones:
     get:
       tags:
-        - Comments
-      summary: Get comments for an article
-      description: Get the comments for an article. Auth is optional
-      operationId: GetArticleComments
+        - Hangzones
+      summary: Get Hangzones
+      description: Get hangzones by some given parameters. Auth is optional
+      operationId: GetHangzones
       parameters:
-        - name: slug
-          in: path
-          description: Slug of the article that you want to get comments for
-          required: true
+        - name: search
+          in: query
+          description: Search text to find a hangzone by similar name
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Pagination page
+          required: false
           schema:
             type: string
       responses:
@@ -149,7 +155,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MultipleCommentsResponse'
+                $ref: '#/components/schemas/MultipleHangzonesResponse'
         401:
           description: Unauthorized
           content: {}
@@ -161,13 +167,13 @@ paths:
                 $ref: '#/components/schemas/GenericErrorModel'
     post:
       tags:
-        - Comments
+        - Hangzones
       summary: Create a comment for an article
       description: Create a comment for an article. Auth is required
       operationId: CreateArticleComment
       parameters:
         - name: slug
-          in: path
+          in: query
           description: Slug of the article that you want to create a comment for
           required: true
           schema:
@@ -200,7 +206,7 @@ paths:
       x-codegen-request-body-name: comment
 components:
   schemas:
-    LoginUser:
+    LoginUserHanger:
       required:
         - email
         - password
@@ -218,7 +224,7 @@ components:
       properties:
         user_hanger:
           $ref: '#/components/schemas/LoginUser'
-    NewUser:
+    NewUserHanger:
       required:
         - email
         - password
@@ -237,9 +243,9 @@ components:
         - user
       type: object
       properties:
-        user:
+        user_hanger:
           $ref: '#/components/schemas/NewUser'
-    User:
+    UserHanger:
       required:
         - status_description
         - email
@@ -263,9 +269,9 @@ components:
         - user
       type: object
       properties:
-        user:
-          $ref: '#/components/schemas/User'
-    UpdateUser:
+        user_hanger:
+          $ref: '#/components/schemas/UserHanger'
+    UpdateUserHanger:
       type: object
       properties:
         email:
@@ -283,7 +289,7 @@ components:
         - user
       type: object
       properties:
-        user:
+        user_hanger:
           $ref: '#/components/schemas/UpdateUser'
     ProfileResponse:
       required:
@@ -433,7 +439,7 @@ components:
       properties:
         comment:
           $ref: '#/components/schemas/Comment'
-    MultipleCommentsResponse:
+    MultipleHangzonesResponse:
       required:
         - comments
       type: object
