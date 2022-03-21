@@ -1,6 +1,7 @@
 use super::PaginationParams;
 use crate::auth::Auth;
 use crate::db;
+use rocket::http::Status;
 use rocket::serde::json::{json, Value};
 use rocket::State;
 use sqlx::postgres::PgPool;
@@ -19,21 +20,19 @@ pub async fn get_friends(
     json!({ "friends": null })
 }
 
-// TODO: make 201 response
 #[post("/friends/<friend_id>")]
-pub async fn add_friend(auth: Auth, friend_id: i32, pool: &State<PgPool>) -> Value {
+pub async fn add_friend(auth: Auth, friend_id: i32, pool: &State<PgPool>) -> Status {
     let res = db::friends::create_one(pool, auth.id, friend_id)
         .await
         .map_err(|e| eprintln!("Err creating friend: {}", e))
         .is_ok();
-    json!({ "ok": res })
+    Status::Created
 }
 
-// TODO: make 201 response
-#[delete("/friends?<friend_id>")]
-pub async fn delete_friend(auth: Auth, friend_id: i32, pool: &State<PgPool>) -> Value {
+#[delete("/friends/<friend_id>")]
+pub async fn delete_friend(auth: Auth, friend_id: i32, pool: &State<PgPool>) -> Status {
     let res = db::friends::delete_one(pool, auth.id, friend_id)
         .await
         .is_ok();
-    json!({ "ok": res })
+    Status::Created
 }
