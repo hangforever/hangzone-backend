@@ -55,10 +55,11 @@ pub async fn find(
     pos: Option<Position>,
     search: Option<String>,
     page: Option<i64>,
-) -> Result<Vec<Hangzone>, sqlx::Error> {
+) -> Option<Vec<Hangzone>> {
     if let Some(pos) = pos {
-        let hangzones = find_by_pos(pool, &pos).await?;
-        return Some(hangzones);
+        if let Ok(hangzones) = find_by_pos(pool, &pos).await {
+            return Some(hangzones);
+        }
     }
     if let Some(search) = search {
         let page = page.unwrap_or(1);
@@ -79,22 +80,23 @@ pub async fn find(
     None
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, FromForm, Debug)]
 pub struct Position {
     lat: f64,
     lng: f64,
 }
-
+const SEARCH_METERS: f64 = 500.0;
 pub async fn find_by_pos(pool: &PgPool, pos: &Position) -> Result<Vec<Hangzone>, sqlx::Error> {
     let hangzones = sqlx::query_as!(
         Hangzone,
         "
 SELECT id, slug, name, description, address_1, address_2, address_3, city, country, ST_AsGeoJson(geography) as geography, postal_code, state, created_at, updated_at
 FROM hangzones 
-WHERE ST_DWithin(geography, ST_SetSRID(ST_MakePoint($1, $2), 4326), 500)
+WHERE ST_DWithin(geography, ST_SetSRID(ST_MakePoint($1, $2), 4326), $3)
         ",
         pos.lng,
-        pos.lat
+        pos.lat,
+        SEARCH_METERS,
     )
         .fetch_all(pool)
         .await?;

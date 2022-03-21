@@ -1,20 +1,21 @@
 use super::PaginationParams;
 use crate::auth::Auth;
 use crate::db;
-use crate::db::hangzones::HangzoneBody;
+use crate::db::hangzones::{HangzoneBody, Position};
 use rocket::http::Status;
 use rocket::serde::json::{json, Json, Value};
 use rocket::State;
 use sqlx::postgres::PgPool;
 
-#[get("/hangzones?<search>&<pos>&<pagination_params..>")]
+#[get("/hangzones?<search>&<pos>&<pagination>")]
 pub async fn get_hangzones(
     search: Option<String>,
     pos: Option<Position>,
-    pagination_params: PaginationParams,
+    pagination: PaginationParams,
     pool: &State<PgPool>,
 ) -> Value {
-    let hangzones = db::hangzones::find(pool, pos, search, pagination_params.page).await;
+    println!("latlng: {:?}", pos);
+    let hangzones = db::hangzones::find(pool, pos, search, pagination.page).await;
 
     json!({ "hangzones": hangzones })
 }
