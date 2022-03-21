@@ -1,7 +1,8 @@
 use crate::auth::Auth;
 use crate::config::AppState;
 use crate::db;
-use crate::db::user_hangers::UserBody;
+use crate::db::user_hangers::{Position, UserBody};
+use rocket::http::Status;
 use rocket::serde::json::{json, Json, Value};
 use rocket::serde::Deserialize;
 use rocket::State;
@@ -100,4 +101,15 @@ pub async fn update_user(
         return json!({ "user_hanger": res });
     }
     json!({ "ok": false })
+}
+
+#[put("/users/location", data = "<pos>")]
+pub async fn update_position(auth: Auth, pos: Json<Position>, pool: &State<PgPool>) -> Status {
+    match db::user_hangers::update_geography(pool, pos.into_inner(), auth.id).await {
+        Ok(_) => Status::NoContent,
+        Err(e) => {
+            eprintln!("Could not update position: {}", e);
+            Status::UnprocessableEntity
+        }
+    }
 }

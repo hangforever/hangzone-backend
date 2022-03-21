@@ -68,7 +68,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericErrorModel'
       x-codegen-request-body-name: body
-  /users:
     get:
       tags:
         - User and Authentication
@@ -124,6 +123,30 @@ paths:
                 $ref: '#/components/schemas/GenericErrorModel'
       security:
         - Token: []
+      x-codegen-request-body-name: body
+  /users/location:
+    put:
+      tags:
+        - UserHangers
+      summary: Update hanger location
+      description: Update a hanger's location
+      operationId: UpdateHangerLocation
+      requestBody:
+        description: The position to update the UserHanger to. Given as lat/lng.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Position'
+        required: true
+      responses:
+        204:
+          description: OK
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
       x-codegen-request-body-name: body
   /hangzones:
     get:
@@ -561,6 +584,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Friend'
+    Position:
+      required:
+        - lat
+        - lng
+      type: object
+      properties:
+        lat:
+          type: number
+        lng:
+          type: number
   securitySchemes:
     Token:
       type: apiKey

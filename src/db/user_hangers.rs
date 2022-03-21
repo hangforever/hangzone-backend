@@ -123,6 +123,33 @@ pub async fn update(pool: &PgPool, user_hanger: UserHanger) -> Result<(), sqlx::
     Ok(())
 }
 
+#[derive(Deserialize)]
+pub struct Position {
+    lat: f64,
+    lng: f64,
+}
+
+pub async fn update_geography(
+    pool: &PgPool,
+    pos: Position,
+    user_hanger_id: i32,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "
+        UPDATE user_hangers 
+        SET geography = ST_MakePoint($1, $2) 
+        WHERE id = $3
+        RETURNING id
+        ",
+    )
+    .bind(pos.lng)
+    .bind(pos.lat)
+    .bind(user_hanger_id)
+    .fetch_one(pool)
+    .await?;
+    Ok(())
+}
+
 pub fn row_to_user_hanger_json(row: sqlx::postgres::PgRow) -> UserHanger {
     UserHanger {
         id: row.get("id"),
