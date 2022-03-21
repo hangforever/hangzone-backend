@@ -7,13 +7,14 @@ use rocket::serde::json::{json, Json, Value};
 use rocket::State;
 use sqlx::postgres::PgPool;
 
-#[get("/hangzones?<search>&<pagination_params..>")]
+#[get("/hangzones?<search>&<pos>&<pagination_params..>")]
 pub async fn get_hangzones(
     search: Option<String>,
+    pos: Option<Position>,
     pagination_params: PaginationParams,
     pool: &State<PgPool>,
 ) -> Value {
-    let hangzones = db::hangzones::find(pool, search, pagination_params.page).await;
+    let hangzones = db::hangzones::find(pool, pos, search, pagination_params.page).await;
 
     json!({ "hangzones": hangzones })
 }
