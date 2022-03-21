@@ -1,7 +1,7 @@
 -- Add up migration script here
 CREATE TABLE hangzones (
   id serial PRIMARY KEY,
-  slug text NOT NULL,
+  slug text NOT NULL UNIQUE,
   name text NOT NULL,
   description text,
   address_1 text NOT NULL,
