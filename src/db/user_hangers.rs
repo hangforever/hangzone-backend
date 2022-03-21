@@ -90,6 +90,39 @@ pub async fn login(pool: &PgPool, email: &str, password: &str) -> Option<UserHan
     None
 }
 
+pub async fn update(pool: &PgPool, user_hanger: UserHanger) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "
+        UPDATE user_hangers 
+        SET 
+          first_name = $1,
+          last_name = $2,
+          alias = $3,
+          email_address = $4,
+          status_hang = $5,
+          status_description = $6,
+          icon_url = $7,
+          hash = $8,
+          current_hangzone_id = $9
+        WHERE id = $10
+        RETURNING id
+        ",
+        user_hanger.first_name,
+        user_hanger.last_name,
+        user_hanger.alias,
+        user_hanger.email_address,
+        user_hanger.status_hang as StatusHang,
+        user_hanger.status_description,
+        user_hanger.icon_url,
+        user_hanger.hash,
+        user_hanger.current_hangzone_id,
+        user_hanger.id,
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(())
+}
+
 pub fn row_to_user_hanger_json(row: sqlx::postgres::PgRow) -> UserHanger {
     UserHanger {
         id: row.get("id"),
