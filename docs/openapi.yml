@@ -61,10 +61,6 @@ paths:
       responses:
         201:
           description: Not implemented! - OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserResponse'
         422:
           description: Unexpected error
           content:
@@ -233,6 +229,85 @@ paths:
       security:
         - Token: []
       x-codegen-request-body-name: hangzone
+  /friends:
+    get:
+      tags:
+        - Friends
+      summary: Get Friends
+      description: Get a paginated list of one's own friends 
+      operationId: GetFriends
+      parameters:
+        - name: page
+          in: query
+          description: Pagination page
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultipleFriendsResponse'
+        401:
+          description: Unauthorized
+          content: {}
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+      security:
+        - Token: []
+      x-codegen-request-body-name: hangzone
+  /friends/{friend_id}:
+    post:
+      tags:
+        - Friends
+      summary: Add friend
+      description: Add a new friend
+      operationId: CreateFriend
+      parameters:
+        - name: friend_id
+          in: path
+          description: The ID of the UserHanger you wish to add
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: OK
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+        - Friends
+      summary: Remove friend
+      description: Remove a friend
+      operationId: RemoveFriend
+      parameters:
+        - name: friend_id
+          in: path
+          description: The ID of the UserHanger you wish to remove
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: OK
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
 components:
   schemas:
     LoginUserHanger:
@@ -477,6 +552,15 @@ components:
           type: string
         token:
           type: string
+    MultipleFriendsResponse:
+      required:
+        - friends
+      type: object
+      properties:
+        friends:
+          type: array
+          items:
+            $ref: '#/components/schemas/Friend'
   securitySchemes:
     Token:
       type: apiKey

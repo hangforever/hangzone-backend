@@ -46,7 +46,7 @@ pub async fn rocket() -> _ {
                 routes::hangzones::create_hangzone,
                 routes::user_hangers::post_login,
                 routes::user_hangers::register_user,
-                routes::friends::create_friend,
+                routes::friends::add_friend,
                 routes::friends::get_friends,
                 routes::friends::delete_friend,
             ],
