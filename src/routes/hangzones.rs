@@ -2,6 +2,7 @@ use super::PaginationParams;
 use crate::auth::Auth;
 use crate::db;
 use crate::db::hangzones::HangzoneBody;
+use rocket::http::Status;
 use rocket::serde::json::{json, Json, Value};
 use rocket::State;
 use sqlx::postgres::PgPool;
@@ -22,13 +23,14 @@ pub async fn create_hangzone(
     auth: Auth,
     hangzone_body: Json<HangzoneBody>,
     pool: &State<PgPool>,
-) -> Value {
-    let hangzone = db::hangzones::create_one(pool, hangzone_body.into_inner()).await;
-
-    if let Err(e) = hangzone {
-        eprintln!("Error creating hangzone: {}", e);
+) -> Result<Status, Status> {
+    match db::hangzones::create_one(pool, hangzone_body.into_inner()).await {
+        Ok(_res) => Ok(Status::Created),
+        Err(e) => {
+            eprintln!("Could not create hangzone: {}", e.to_string());
+            Err(Status::UnprocessableEntity)
+        }
     }
-    json!({ "hangzones": null })
 }
 
 #[get("/hangzones/<slug>")]

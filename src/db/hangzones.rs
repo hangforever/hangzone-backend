@@ -3,6 +3,7 @@ use super::user_hangers::row_to_user_hanger_json;
 use crate::models::hangzones::Hangzone;
 use chrono::Utc;
 use rocket::serde::Deserialize;
+use slug;
 use sqlx::postgres::PgPool;
 use sqlx::Row;
 
@@ -79,7 +80,7 @@ pub async fn create_one(
     pool: &PgPool,
     hangzone_body: HangzoneBody,
 ) -> Result<sqlx::postgres::PgRow, sqlx::Error> {
-    let slug = String::from("todo");
+    let slug = slug::slugify(&hangzone_body.name);
     sqlx::query(
         "
 INSERT INTO hangzones
