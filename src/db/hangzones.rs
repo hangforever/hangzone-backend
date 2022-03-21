@@ -30,7 +30,7 @@ pub async fn find_one(
     if let Some(s) = slug {
         let hangzone = sqlx::query_as!(
                 Hangzone,
-                "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, postal_code, state, created_at, updated_at FROM hangzones WHERE slug = $1",
+                "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, ST_AsGeoJson(geography) as geography, postal_code, state, created_at, updated_at FROM hangzones WHERE slug = $1",
                 s
             )
             .fetch_one(pool)
@@ -40,7 +40,7 @@ pub async fn find_one(
         }
     }
     if let Some(h_id) = hangzone_id {
-        let hangzone = sqlx::query_as!(Hangzone, "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, postal_code, state, created_at, updated_at FROM hangzones WHERE id = $1", h_id)
+        let hangzone = sqlx::query_as!(Hangzone, "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, ST_AsGeoJson(geography) as geography, postal_code, state, created_at, updated_at FROM hangzones WHERE id = $1", h_id)
             .fetch_one(pool)
             .await;
         if let Ok(hangzone) = hangzone {
@@ -59,7 +59,7 @@ pub async fn find(
 
     if let Some(search) = search {
         let page = page.unwrap_or(1);
-        let query = "SELECT * FROM hangzones WHERE name ILIKE $1 || '%'";
+        let query = "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, ST_AsGeoJson(geography) as geography, postal_code, state, created_at, updated_at FROM hangzones WHERE name ILIKE $1 || '%'";
         let pagination = query.paginate(page);
         let hangzones = sqlx::query(&pagination.paginated_query())
             .bind(search)
@@ -132,7 +132,7 @@ fn row_to_hangzone_json(row: sqlx::postgres::PgRow) -> Hangzone {
         state: row.get("state"),
         country: row.get("country"),
         postal_code: row.get("postal_code"),
-        // geography: row.get("geography"),
+        geography: row.get("geography"),
         created_at: row.get("created_at"),
         updated_at: row.get("updated_at"),
     }
