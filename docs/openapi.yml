@@ -171,19 +171,18 @@ paths:
       summary: Create a hangzone
       description: Create a hangzone. Auth is required
       operationId: CreateHangzone
-      parameters:
-        - name: slug
-          in: query
-          description: Slug of the article that you want to create a hangzone for
-          required: true
-          schema:
-            type: string
+      requestBody:
+        description: The body of the Hangzone data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHangzoneRequest'
       requestBody:
         description: Hangzone you want to create
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewHangzoneRequest'
+              $ref: '#/components/schemas/CreateHangzoneRequest'
         required: true
       responses:
         200:
@@ -404,20 +403,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Hangzone'
-    NewHangzone:
-      required:
-        - body
-      type: object
-      properties:
-        body:
-          type: string
-    NewHangzoneRequest:
-      required:
-        - hangzone
-      type: object
-      properties:
-        hangzone:
-          $ref: '#/components/schemas/NewHangzone'
     GenericErrorModel:
       required:
         - errors
@@ -432,6 +417,66 @@ components:
               type: array
               items:
                 type: string
+    CreateHangzoneRequest:
+      required:
+        - name
+        - address_1
+        - city
+        - country
+        - lat
+        - lng
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        address_1:
+          type: string
+        address_2:
+          type: string
+        address_3:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        postal_code:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+    Friend:
+      required:
+        - id
+        - first_name
+        - last_name
+        - alias
+        - status_hang
+        - token
+      type: object
+      properties:
+        id:
+          type: number
+        first_name:
+          type: string
+        last_name:
+          type: string
+        alias:
+          type: string
+        email_address:
+          type: string
+        status_hang:
+          type: string
+        status_description:
+          type: string
+        icon_url:
+          type: string
+        token:
+          type: string
   securitySchemes:
     Token:
       type: apiKey
