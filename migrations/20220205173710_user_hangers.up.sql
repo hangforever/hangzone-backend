@@ -23,11 +23,3 @@ CREATE TABLE friends (
   updated_at timestamptz NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE request_hangs (
-  id serial PRIMARY KEY,
-  from_user_hanger_id integer REFERENCES user_hangers NOT NULL,
-  to_user_hanger_id integer REFERENCES user_hangers NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT NOW(),
-  updated_at timestamptz NOT NULL DEFAULT NOW()
-);
-

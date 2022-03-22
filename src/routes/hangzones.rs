@@ -14,7 +14,6 @@ pub async fn get_hangzones(
     pagination: PaginationParams,
     pool: &State<PgPool>,
 ) -> Value {
-    println!("latlng: {:?}", pos);
     let hangzones = db::hangzones::find(pool, pos, search, pagination.page).await;
 
     json!({ "hangzones": hangzones })
