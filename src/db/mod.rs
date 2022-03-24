@@ -3,6 +3,7 @@ use std::env;
 
 pub mod friends;
 pub mod hangzones;
+pub mod notifications;
 pub mod pagination;
 pub mod user_hangers;
 
