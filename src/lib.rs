@@ -26,6 +26,14 @@ fn not_found() -> Value {
     })
 }
 
+#[catch(422)]
+fn unprocessable_entity() -> Value {
+    json!({
+        "status": "error",
+        "reason": "You did something bad."
+    })
+}
+
 fn cors_fairing() -> Cors {
     CorsOptions::default()
         .to_cors()
@@ -54,5 +62,5 @@ pub async fn rocket() -> _ {
         .manage::<PgPool>(pool)
         .attach(cors_fairing())
         .attach(config::AppState::manage())
-        .register("/", catchers![not_found])
+        .register("/", catchers![not_found, unprocessable_entity])
 }
