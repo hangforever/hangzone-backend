@@ -30,7 +30,7 @@ pub async fn find_one(
     if let Some(s) = slug {
         let hangzone = sqlx::query_as!(
                 Hangzone,
-                "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, postal_code, state, created_at, updated_at FROM hangzones WHERE slug = $1",
+                "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, ST_AsGeoJson(geography) as geography, postal_code, state, created_at, updated_at FROM hangzones WHERE slug = $1",
                 s
             )
             .fetch_one(pool)
@@ -40,7 +40,7 @@ pub async fn find_one(
         }
     }
     if let Some(h_id) = hangzone_id {
-        let hangzone = sqlx::query_as!(Hangzone, "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, postal_code, state, created_at, updated_at FROM hangzones WHERE id = $1", h_id)
+        let hangzone = sqlx::query_as!(Hangzone, "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, ST_AsGeoJson(geography) as geography, postal_code, state, created_at, updated_at FROM hangzones WHERE id = $1", h_id)
             .fetch_one(pool)
             .await;
         if let Ok(hangzone) = hangzone {
@@ -52,14 +52,18 @@ pub async fn find_one(
 
 pub async fn find(
     pool: &PgPool,
+    pos: Option<Position>,
     search: Option<String>,
     page: Option<i64>,
 ) -> Option<Vec<Hangzone>> {
-    // TODO: support GPS coordinates with latlng
-
+    if let Some(pos) = pos {
+        if let Ok(hangzones) = find_by_pos(pool, &pos).await {
+            return Some(hangzones);
+        }
+    }
     if let Some(search) = search {
         let page = page.unwrap_or(1);
-        let query = "SELECT * FROM hangzones WHERE name ILIKE $1 || '%'";
+        let query = "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, ST_AsGeoJson(geography) as geography, postal_code, state, created_at, updated_at FROM hangzones WHERE name ILIKE $1 || '%'";
         let pagination = query.paginate(page);
         let hangzones = sqlx::query(&pagination.paginated_query())
             .bind(search)
@@ -74,6 +78,29 @@ pub async fn find(
         }
     }
     None
+}
+
+#[derive(Deserialize, FromForm, Debug)]
+pub struct Position {
+    lat: f64,
+    lng: f64,
+}
+const SEARCH_METERS: f64 = 500.0;
+pub async fn find_by_pos(pool: &PgPool, pos: &Position) -> Result<Vec<Hangzone>, sqlx::Error> {
+    let hangzones = sqlx::query_as!(
+        Hangzone,
+        "
+SELECT id, slug, name, description, address_1, address_2, address_3, city, country, ST_AsGeoJson(geography) as geography, postal_code, state, created_at, updated_at
+FROM hangzones 
+WHERE ST_DWithin(geography, ST_SetSRID(ST_MakePoint($1, $2), 4326), $3)
+        ",
+        pos.lng,
+        pos.lat,
+        SEARCH_METERS,
+    )
+        .fetch_all(pool)
+        .await?;
+    Ok(hangzones)
 }
 
 pub async fn create_one(
@@ -132,7 +159,7 @@ fn row_to_hangzone_json(row: sqlx::postgres::PgRow) -> Hangzone {
         state: row.get("state"),
         country: row.get("country"),
         postal_code: row.get("postal_code"),
-        // geography: row.get("geography"),
+        geography: row.get("geography"),
         created_at: row.get("created_at"),
         updated_at: row.get("updated_at"),
     }

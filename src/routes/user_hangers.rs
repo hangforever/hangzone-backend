@@ -1,7 +1,8 @@
 use crate::auth::Auth;
 use crate::config::AppState;
 use crate::db;
-use crate::db::user_hangers::UserBody;
+use crate::db::user_hangers::{Position, UserBody};
+use rocket::http::Status;
 use rocket::serde::json::{json, Json, Value};
 use rocket::serde::Deserialize;
 use rocket::State;
@@ -59,4 +60,56 @@ pub async fn get_user(auth: Auth, pool: &State<PgPool>, state: &State<AppState>)
     json!({ "user_hanger": null })
 }
 
-// TODO: update user
+#[derive(Deserialize)]
+pub struct UserHangerUpdate {
+    first_name: Option<String>,
+    last_name: Option<String>,
+    alias: Option<String>,
+    email_address: Option<String>,
+    status_description: Option<String>,
+    icon_url: Option<String>,
+}
+
+#[put("/users", data = "<update>")]
+pub async fn update_user(
+    auth: Auth,
+    update: Json<UserHangerUpdate>,
+    pool: &State<PgPool>,
+    state: &State<AppState>,
+) -> Value {
+    if let Ok(mut hanger) = db::user_hangers::find_one(pool, auth.id).await {
+        let update = update.into_inner();
+        if let Some(first_name) = update.first_name {
+            hanger.first_name = first_name;
+        }
+        if let Some(last_name) = update.last_name {
+            hanger.last_name = last_name;
+        }
+        if let Some(alias) = update.alias {
+            hanger.alias = alias;
+        }
+        if let Some(email_address) = &update.email_address {
+            hanger.email_address = update.email_address;
+        }
+        if let Some(status_description) = &update.status_description {
+            hanger.status_description = update.status_description;
+        }
+        if let Some(icon_url) = &update.icon_url {
+            hanger.icon_url = update.icon_url;
+        }
+        let res = db::user_hangers::update(pool, hanger).await.is_ok();
+        return json!({ "user_hanger": res });
+    }
+    json!({ "ok": false })
+}
+
+#[put("/users/location", data = "<pos>")]
+pub async fn update_position(auth: Auth, pos: Json<Position>, pool: &State<PgPool>) -> Status {
+    match db::user_hangers::update_geography(pool, pos.into_inner(), auth.id).await {
+        Ok(_) => Status::NoContent,
+        Err(e) => {
+            eprintln!("Could not update position: {}", e);
+            Status::UnprocessableEntity
+        }
+    }
+}

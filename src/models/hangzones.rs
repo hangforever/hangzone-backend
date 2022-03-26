@@ -15,7 +15,7 @@ pub struct Hangzone {
     pub state: Option<String>,
     pub country: String,
     pub postal_code: Option<String>,
-    // pub geography: (f32, f32),
+    pub geography: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
