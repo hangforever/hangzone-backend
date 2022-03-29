@@ -2,10 +2,11 @@ use chrono::{DateTime, Utc};
 use rocket::serde::Serialize;
 
 #[derive(sqlx::Type, Serialize, Debug)]
-#[sqlx(type_name = "notification_type", rename_all = "lowercase")]
+#[sqlx(type_name = "notification_type", rename_all = "snake_case")]
 pub enum NotificationType {
     Hang,
-    Friend,
+    FriendRequest,
+    FriendAdded,
 }
 
 #[derive(Serialize, Debug)]

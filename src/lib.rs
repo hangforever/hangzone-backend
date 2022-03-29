@@ -15,6 +15,7 @@ use sqlx::PgPool;
 mod auth;
 mod config;
 pub mod db;
+mod errors;
 mod models;
 mod routes;
 
@@ -56,10 +57,13 @@ pub async fn rocket() -> _ {
                 routes::user_hangers::register_user,
                 routes::user_hangers::update_user,
                 routes::user_hangers::update_position,
-                routes::friends::add_friend,
+                routes::friends::request_friend,
+                routes::friends::accept_friend,
                 routes::friends::get_friends,
                 routes::friends::delete_friend,
                 routes::notifications::get_notifications,
+                routes::notifications::update_read,
+                routes::notifications::update_trash,
             ],
         )
         .manage::<PgPool>(pool)
