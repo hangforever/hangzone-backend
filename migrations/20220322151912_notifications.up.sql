@@ -1,5 +1,5 @@
 -- Add up migration script here
-CREATE TYPE notification_type AS ENUM ('hang', 'friend');
+CREATE TYPE notification_type AS ENUM ('hang', 'friend_request', 'friend_added');
 
 CREATE TABLE notifications (
   id serial PRIMARY KEY,
