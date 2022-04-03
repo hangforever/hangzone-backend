@@ -14,16 +14,12 @@ pub async fn get_friends(
     pool: &State<PgPool>,
 ) -> Value {
     let friends = db::friends::find(pool, auth.id, pagination_params.page).await;
-    if let Some(friends) = friends {
-        return json!({ "friends": friends });
-    }
-
-    json!({ "friends": null })
+    json!({ "friends": friends })
 }
 
 #[post("/friends/request/<friend_id>")]
 pub async fn accept_friend(auth: Auth, friend_id: i32, pool: &State<PgPool>) -> Status {
-    // TODO: find friend request
+    //if let Some(friend_request) = db::
     // TODO: if you're already friends, delete request, upgrade to friend
     let res = db::friends::create_one(pool, auth.id, friend_id)
         .await
@@ -46,7 +42,7 @@ async fn handle_friend_added_notification(pool: &State<PgPool>, friend_id: i32, 
 
 #[post("/friends/request/<friend_id>")]
 pub async fn request_friend(auth: Auth, friend_id: i32, pool: &State<PgPool>) -> Status {
-    db::friends::find(pool, user_hanger_id, page)
+    //db::friends::find(pool, user_hanger_id, page)
     // TODO: create a friend request
     handle_friend_requested_notification(pool, friend_id, &auth.alias).await;
     Status::Created
@@ -56,7 +52,7 @@ async fn handle_friend_requested_notification(pool: &State<PgPool>, friend_id: i
     db::notifications::create_one(
         pool,
         friend_id,
-        NotificationType::FriendRequested,
+        NotificationType::FriendAdded,
         &format!("{} requested you as a friend!", alias),
     )
     .await
