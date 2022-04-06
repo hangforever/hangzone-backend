@@ -1,7 +1,11 @@
 use crate::models::requests::{FriendRequest, RequestStatus};
 use sqlx::postgres::PgPool;
 
-pub async fn find_one(pool: &PgPool, from_id: i32, to_id: i32) -> Option<FriendRequest> {
+pub async fn find_one(
+    pool: &PgPool,
+    from_id: i32,
+    to_id: i32,
+) -> Result<FriendRequest, sqlx::Error> {
     sqlx::query_as!(
         FriendRequest,
         r#"
@@ -15,11 +19,9 @@ pub async fn find_one(pool: &PgPool, from_id: i32, to_id: i32) -> Option<FriendR
     )
     .fetch_one(pool)
     .await
-    .map_err(|e| eprintln!("Could not find request_friend: {}", e))
-    .ok()
 }
 
-pub async fn find(pool: &PgPool, to_id: i32) -> Option<Vec<FriendRequest>> {
+pub async fn find(pool: &PgPool, to_id: i32) -> Result<Vec<FriendRequest>, sqlx::Error> {
     sqlx::query_as!(
         FriendRequest,
         r#"
@@ -31,8 +33,6 @@ pub async fn find(pool: &PgPool, to_id: i32) -> Option<Vec<FriendRequest>> {
     )
     .fetch_all(pool)
     .await
-    .map_err(|e| eprintln!("Could not find request_friend: {}", e))
-    .ok()
 }
 
 pub async fn create(
@@ -52,6 +52,37 @@ pub async fn create(
         to_id,
         message,
         RequestStatus::AwaitingResponse as RequestStatus,
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn update(pool: &PgPool, id: i32, status: RequestStatus) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+            UPDATE request_friends
+            SET 
+                status = $1
+            WHERE id = $2 
+            RETURNING id
+        "#,
+    )
+    .bind(status)
+    .bind(id)
+    .fetch_one(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn delete(pool: &PgPool, id: i32) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"
+            DELETE FROM request_friends
+            WHERE id = $1
+            RETURNING id
+        "#,
+        id,
     )
     .fetch_one(pool)
     .await?;

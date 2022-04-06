@@ -32,11 +32,29 @@ pub async fn find(pool: &PgPool, user_hanger_id: i32, page: Option<i64>) -> Opti
     None
 }
 
-pub async fn create_one(
-    pool: &PgPool,
-    user_hanger_id: i32,
-    friend_id: i32,
-) -> Result<PgRow, sqlx::Error> {
+pub async fn find_one(pool: &PgPool, user_hanger_id: i32, friend_id: i32) -> Option<Friend> {
+    sqlx::query(
+        "
+        SELECT *
+        FROM user_hangers
+        WHERE id IN (
+            SELECT friend_user_hanger_id 
+            FROM user_hangers 
+            INNER JOIN friends ON user_hangers.id = friends.user_hanger_id
+            WHERE friends.user_hanger_id = $1 AND
+                friend_user_hanger_id = $2
+        )
+        ",
+    )
+    .bind(user_hanger_id)
+    .bind(friend_id)
+    .map(|r| row_to_friend(r))
+    .fetch_one(pool)
+    .await
+    .ok()
+}
+
+async fn create_friend_record(pool: &PgPool, from_id: i32, to_id: i32) -> Result<(), sqlx::Error> {
     sqlx::query(
         "
 INSERT INTO friends
@@ -48,12 +66,25 @@ VALUES ($1, $2, $3, $4)
 RETURNING id
     ",
     )
-    .bind(user_hanger_id)
-    .bind(friend_id)
+    .bind(from_id)
+    .bind(to_id)
     .bind(Utc::now())
     .bind(Utc::now())
     .fetch_one(pool)
-    .await
+    .await?;
+    Ok(())
+}
+
+pub async fn create_one(
+    pool: &PgPool,
+    user_hanger_id: i32,
+    friend_id: i32,
+) -> Result<(), sqlx::Error> {
+    let transaction = pool.begin().await?;
+    create_friend_record(pool, user_hanger_id, friend_id).await;
+    create_friend_record(pool, friend_id, user_hanger_id).await;
+    transaction.commit().await?;
+    Ok(())
 }
 
 pub async fn delete_one(
