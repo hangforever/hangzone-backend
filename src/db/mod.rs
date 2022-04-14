@@ -6,6 +6,7 @@ pub mod hangzones;
 pub mod notifications;
 pub mod pagination;
 pub mod request_friends;
+pub mod request_hangs;
 pub mod user_hangers;
 
 pub async fn get_pool() -> Result<PgPool, sqlx::Error> {
