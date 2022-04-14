@@ -6,11 +6,9 @@ CREATE TABLE request_hangs (
   from_user_hanger_id integer REFERENCES user_hangers NOT NULL,
   to_user_hanger_id integer REFERENCES user_hangers NOT NULL,
   message text,
-  hangzone_id integer REFERENCES hangzones NOT NULL,
+  hang_session_id integer REFERENCES hang_sessions NOT NULL,
   status request_status NOT NULL default 'awaiting_response',
-  time timestamptz NOT NULL DEFAULT NOW(),
   created_at timestamptz NOT NULL DEFAULT NOW(),
-  updated_at timestamptz NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE request_friends (

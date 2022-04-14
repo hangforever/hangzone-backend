@@ -9,14 +9,14 @@ use rocket::State;
 use sqlx::postgres::PgPool;
 
 #[get("/requests/hangs")]
-pub async fn get_friend_requests(auth: Auth, pool: &State<PgPool>) -> Value {
-    let requests = db::request_friends::find(pool, auth.id)
+pub async fn get_hang_requests(auth: Auth, pool: &State<PgPool>) -> Value {
+    let requests = db::request_hangs::find(pool, auth.id)
         .await
         .map_err(|e| {
-            eprintln!("Error getting friend requests: {}", e);
+            eprintln!("Error getting hang requests: {}", e);
         })
         .unwrap_or(vec![]);
-    json!({ "friend_requests": requests })
+    json!({ "hang_requests": requests })
 }
 
 #[post("/requests/hangs/<friend_id>?<message>")]

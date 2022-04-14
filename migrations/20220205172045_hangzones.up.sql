@@ -15,3 +15,11 @@ CREATE TABLE hangzones (
   created_at timestamptz NOT NULL DEFAULT NOW(),
   updated_at timestamptz NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE hang_session (
+  id serial PRIMARY KEY,
+  name text NULL,
+  description text,
+  hangzone_id integer REFERENCES hangzones,
+  starts_at timestamptz NOT NULL DEFAULT NOW(),
+);
