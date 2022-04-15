@@ -5,7 +5,7 @@ pub async fn find_one(pool: &PgPool, from_id: i32, to_id: i32) -> Result<HangReq
     sqlx::query_as!(
         HangRequest,
         r#"
-            SELECT id, from_user_hanger_id, to_user_hanger_id, message, status as "status: RequestStatus", created_at, updated_at 
+            SELECT id, from_user_hanger_id, to_user_hanger_id, message, status as "status: RequestStatus", hang_session_id, created_at, updated_at 
             FROM request_hangs
             WHERE from_user_hanger_id = $1
                 AND to_user_hanger_id = $2

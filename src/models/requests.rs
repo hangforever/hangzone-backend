@@ -22,6 +22,7 @@ pub struct HangRequest {
     pub from_user_hanger_id: i32,
     pub to_user_hanger_id: i32,
     pub message: Option<String>,
+    pub hang_session_id: i32,
     pub status: RequestStatus,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
