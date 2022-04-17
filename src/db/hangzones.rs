@@ -1,5 +1,6 @@
 use super::pagination::Paginate;
 use super::user_hangers::row_to_user_hanger_json;
+use crate::constants::SEARCH_METERS;
 use crate::models::hangzones::Hangzone;
 use chrono::Utc;
 use rocket::serde::Deserialize;
@@ -85,7 +86,7 @@ pub struct Position {
     lat: f64,
     lng: f64,
 }
-const SEARCH_METERS: f64 = 500.0;
+
 pub async fn find_by_pos(pool: &PgPool, pos: &Position) -> Result<Vec<Hangzone>, sqlx::Error> {
     let hangzones = sqlx::query_as!(
         Hangzone,

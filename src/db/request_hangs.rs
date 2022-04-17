@@ -21,7 +21,7 @@ pub async fn find(pool: &PgPool, to_id: i32) -> Result<Vec<HangRequest>, sqlx::E
     sqlx::query_as!(
         HangRequest,
         r#"
-            SELECT id, from_user_hanger_id, to_user_hanger_id, message, status as "status: RequestStatus", created_at, updated_at 
+            SELECT id, from_user_hanger_id, to_user_hanger_id, message, status as "status: RequestStatus", hang_session_id, created_at, updated_at 
             FROM request_hangs
             WHERE to_user_hanger_id = $1
         "#,
@@ -35,18 +35,20 @@ pub async fn create(
     pool: &PgPool,
     from_id: i32,
     to_id: i32,
+    hang_session_id: i32,
     message: Option<String>,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"
             INSERT INTO request_hangs
-            (from_user_hanger_id, to_user_hanger_id, message, status) 
-            VALUES ($1, $2, $3, $4)
+            (from_user_hanger_id, to_user_hanger_id, message, hang_session_id, status) 
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING id
         "#,
         from_id,
         to_id,
         message,
+        hang_session_id,
         RequestStatus::AwaitingResponse as RequestStatus,
     )
     .fetch_one(pool)
