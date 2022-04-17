@@ -20,7 +20,7 @@ pub async fn get_hang_requests(auth: Auth, pool: &State<PgPool>) -> Value {
 }
 
 #[post("/requests/hangs/<friend_id>?<message>")]
-pub async fn request_friend(
+pub async fn request_hang(
     auth: Auth,
     friend_id: i32,
     message: Option<String>,
