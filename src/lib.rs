@@ -14,9 +14,11 @@ use sqlx::PgPool;
 
 mod auth;
 mod config;
+mod constants;
 pub mod db;
 mod errors;
 mod models;
+mod position;
 mod routes;
 
 #[catch(404)]
