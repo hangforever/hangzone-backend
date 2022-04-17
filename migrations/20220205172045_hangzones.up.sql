@@ -18,8 +18,8 @@ CREATE TABLE hangzones (
 
 CREATE TABLE hang_sessions (
   id serial PRIMARY KEY,
-  name text NULL,
-  description text,
-  hangzone_id integer REFERENCES hangzones,
+  name text NOT NULL,
+  description text DEFAULT '',
+  hangzone_id integer REFERENCES hangzones NOT NULL,
   starts_at timestamptz NOT NULL DEFAULT NOW()
 );
