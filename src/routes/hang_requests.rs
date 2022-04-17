@@ -94,32 +94,32 @@ async fn handle_hang_requested_notification<'a, 'b>(
 }
 
 #[post("/requests/hangs/cancel/<friend_id>")]
-pub async fn cancel_friend<'a, 'b>(
+pub async fn cancel_hang<'a, 'b>(
     pool: &'a State<PgPool>,
     auth: Auth,
     friend_id: i32,
 ) -> Result<(), &'b str> {
-    let friend_request = db::request_friends::find_one(pool, auth.id, friend_id)
+    let hang_request = db::request_hangs::find_one(pool, auth.id, friend_id)
         .await
         .map_err(|e| "Invalid request")?;
-    db::request_friends::update(pool, friend_request.id, RequestStatus::Cancelled)
+    db::request_hangs::update(pool, hang_request.id, RequestStatus::Cancelled)
         .await
         .map_err(|e| {
             eprintln!("{}", e);
-            "Error updating friend request"
+            "Error updating hang request"
         })
 }
 
 #[post("/requests/hangs/decline/<friend_id>")]
-pub async fn decline_friend<'a, 'b>(
+pub async fn decline_hang<'a, 'b>(
     pool: &'a State<PgPool>,
     auth: Auth,
     friend_id: i32,
 ) -> Result<(), &'b str> {
-    let friend_request = db::request_friends::find_one(pool, friend_id, auth.id)
+    let hang_request = db::request_hangs::find_one(pool, friend_id, auth.id)
         .await
         .map_err(|e| "Invalid request")?;
-    db::request_friends::update(pool, friend_request.id, RequestStatus::Declined)
+    db::request_hangs::update(pool, hang_request.id, RequestStatus::Declined)
         .await
         .map_err(|e| {
             eprintln!("{}", e);
@@ -128,52 +128,18 @@ pub async fn decline_friend<'a, 'b>(
 }
 
 #[post("/requests/hangs/accept/<friend_id>")]
-pub async fn accept_friend(
-    auth: Auth,
-    friend_id: i32,
-    pool: &State<PgPool>,
-) -> Result<Status, &str> {
-    let transaction = pool.begin().await.map_err(|e| {
-        eprintln!("Transaction err: {}", e);
-        "Transaction error"
-    })?;
-    let friend_request = db::request_friends::find_one(pool, friend_id, auth.id)
+pub async fn accept_hang(auth: Auth, friend_id: i32, pool: &State<PgPool>) -> Result<Status, &str> {
+    let hang_request = db::request_hangs::find_one(pool, friend_id, auth.id)
         .await
         .map_err(|e| {
-            eprintln!("Error finding friend request: {}", e);
-            "Could not find friend request"
+            eprintln!("Error finding request_hangs: {}", e);
+            "Could not find hang request"
         })?;
-    db::request_friends::update(pool, friend_request.id, RequestStatus::Accepted)
+    db::request_hangs::update(pool, hang_request.id, RequestStatus::Accepted)
         .await
         .map_err(|e| {
             eprintln!("{}", e);
             "Error updating friend request"
         })?;
-    db::friends::create_one(pool, auth.id, friend_id)
-        .await
-        .map_err(|e| "Error adding friend")?;
-    handle_friend_added_notification(pool, friend_id, &auth.alias).await?;
-    transaction.commit().await.map_err(|e| {
-        eprintln!("Transaction begin err: {}", e);
-        "Error with friend request"
-    })?;
     Ok(Status::Created)
-}
-
-async fn handle_friend_added_notification<'a, 'b>(
-    pool: &'a State<PgPool>,
-    friend_id: i32,
-    alias: &str,
-) -> Result<(), &'b str> {
-    db::notifications::create_one(
-        pool,
-        friend_id,
-        NotificationType::FriendAdded,
-        &format!("{} added you as a friend!", alias),
-    )
-    .await
-    .map_err(|e| {
-        eprintln!("Err creating friend: {}", e);
-        "Error creating notification"
-    })
 }

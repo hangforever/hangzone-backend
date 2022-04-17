@@ -1,7 +1,8 @@
 use super::PaginationParams;
 use crate::auth::Auth;
 use crate::db;
-use crate::db::hangzones::{HangzoneBody, Position};
+use crate::db::hangzones::HangzoneBody;
+use crate::position::Position;
 use rocket::http::Status;
 use rocket::serde::json::{json, Json, Value};
 use rocket::State;
