@@ -8,7 +8,7 @@ CREATE TABLE request_hangs (
   message text,
   hang_session_id integer REFERENCES hang_sessions NOT NULL,
   status request_status NOT NULL default 'awaiting_response',
-  created_at timestamptz NOT NULL DEFAULT NOW(),
+  created_at timestamptz NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE request_friends (
@@ -17,6 +17,6 @@ CREATE TABLE request_friends (
   to_user_hanger_id integer REFERENCES user_hangers NOT NULL,
   message text,
   status request_status NOT NULL default 'awaiting_response',
-  created_at timestamptz NOT NULL DEFAULT NOW(),
+  created_at timestamptz NOT NULL DEFAULT NOW()
 );
 
