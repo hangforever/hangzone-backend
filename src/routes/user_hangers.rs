@@ -1,7 +1,8 @@
 use crate::auth::Auth;
 use crate::config::AppState;
 use crate::db;
-use crate::db::user_hangers::{Position, UserBody};
+use crate::db::user_hangers::UserBody;
+use crate::position::Position;
 use rocket::http::Status;
 use rocket::serde::json::{json, Json, Value};
 use rocket::serde::Deserialize;

@@ -64,6 +64,7 @@ pub async fn rocket() -> _ {
                 routes::hang_requests::decline_hang,
                 routes::hang_requests::get_hang_requests,
                 routes::hang_requests::request_hang,
+                routes::hangzones::check_in,
                 routes::hangzones::create_hangzone,
                 routes::hangzones::get_hangzone,
                 routes::hang_sessions::create_hang_session,

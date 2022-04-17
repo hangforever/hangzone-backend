@@ -1,4 +1,5 @@
 use crate::models::user_hangers::{StatusHang, UserHanger};
+use crate::position::Position;
 use chrono::{DateTime, Utc};
 use rocket::serde::Deserialize;
 use scrypt::{
@@ -123,10 +124,25 @@ pub async fn update(pool: &PgPool, user_hanger: UserHanger) -> Result<(), sqlx::
     Ok(())
 }
 
-#[derive(Deserialize)]
-pub struct Position {
-    lat: f64,
-    lng: f64,
+pub async fn update_hangzone_id(
+    pool: &PgPool,
+    id: i32,
+    hangzone_id: i32,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "
+        UPDATE user_hangers 
+        SET 
+          current_hangzone_id = $1
+        WHERE id = $2
+        RETURNING id
+        ",
+        hangzone_id,
+        id,
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(())
 }
 
 pub async fn update_geography(
