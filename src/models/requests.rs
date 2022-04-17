@@ -25,7 +25,6 @@ pub struct HangRequest {
     pub status: RequestStatus,
     pub hang_session_id: i32,
     pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Serialize, Debug)]
@@ -37,5 +36,4 @@ pub struct FriendRequest {
     pub message: Option<String>,
     pub status: RequestStatus,
     pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
 }

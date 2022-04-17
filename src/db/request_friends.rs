@@ -9,7 +9,7 @@ pub async fn find_one(
     sqlx::query_as!(
         FriendRequest,
         r#"
-            SELECT id, from_user_hanger_id, to_user_hanger_id, message, status as "status: RequestStatus", created_at, updated_at 
+            SELECT id, from_user_hanger_id, to_user_hanger_id, message, status as "status: RequestStatus", created_at 
             FROM request_friends
             WHERE from_user_hanger_id = $1
                 AND to_user_hanger_id = $2
@@ -25,7 +25,7 @@ pub async fn find(pool: &PgPool, to_id: i32) -> Result<Vec<FriendRequest>, sqlx:
     sqlx::query_as!(
         FriendRequest,
         r#"
-            SELECT id, from_user_hanger_id, to_user_hanger_id, message, status as "status: RequestStatus", created_at, updated_at 
+            SELECT id, from_user_hanger_id, to_user_hanger_id, message, status as "status: RequestStatus", created_at 
             FROM request_friends
             WHERE to_user_hanger_id = $1
         "#,
