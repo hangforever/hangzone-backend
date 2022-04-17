@@ -25,7 +25,28 @@ pub async fn find(pool: &PgPool, to_id: i32) -> Result<Vec<HangRequest>, sqlx::E
             FROM request_hangs
             WHERE to_user_hanger_id = $1
         "#,
-        to_id
+        to_id,
+    )
+    .fetch_all(pool)
+    .await
+}
+
+pub async fn find_all(
+    pool: &PgPool,
+    from_id: i32,
+    to_ids: &[i32],
+) -> Result<Vec<HangRequest>, sqlx::Error> {
+    sqlx::query_as!(
+        HangRequest,
+        r#"
+            SELECT id, from_user_hanger_id, to_user_hanger_id, message, status as "status: RequestStatus", hang_session_id, created_at 
+            FROM request_hangs
+            WHERE 
+                from_user_hanger_id = $1 AND
+                to_user_hanger_id = ANY($2)
+        "#,
+        from_id,
+        to_ids
     )
     .fetch_all(pool)
     .await
