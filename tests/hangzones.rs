@@ -1,6 +1,6 @@
 use hangzone_backend;
 use rocket::http::{ContentType, Status};
-use rocket::local::asynchronous::Client;
+use rocket::local::asynchronous::{Client, LocalResponse};
 
 mod common;
 
@@ -8,31 +8,44 @@ use common::*;
 
 #[rocket::async_test]
 async fn get_hangzone_test() {
-    let rocket = hangzone_backend::rocket().await;
-    let client = Client::tracked(rocket).await.unwrap();
-    let response = client.get("/api/hangzones/1").dispatch().await;
+    let client = create_client().await;
+    let token = login(&client).await;
+    let name = "my_hangzone_man".to_string();
+    create_hangzone(&client, &token, &name).await;
+    let response = client
+        .get(format!("/api/hangzones/{}", name))
+        .dispatch()
+        .await;
     assert_eq!(response.status(), Status::Ok);
 }
 
 #[rocket::async_test]
 async fn get_hangzones_test() {
-    let rocket = hangzone_backend::rocket().await;
-    let client = Client::tracked(rocket).await.unwrap();
+    let client = create_client().await;
     let response = client.get("/api/hangzones").dispatch().await;
     assert_eq!(response.status(), Status::Ok);
 }
 
 #[rocket::async_test]
 async fn create_hangzones_test() {
-    let rocket = hangzone_backend::rocket().await;
-    let client = Client::tracked(rocket).await.unwrap();
+    let client = create_client().await;
     let token = login(&client).await;
-    let response = client
+    let name = "my_hangzone".to_string();
+    let response = create_hangzone(&client, &token, &name).await;
+    assert_eq!(response.status(), Status::Created);
+}
+
+async fn create_hangzone<'a>(
+    client: &'a Client,
+    token: &'a Token,
+    name: &str,
+) -> LocalResponse<'a> {
+    client
         .post("/api/hangzones")
         .header(ContentType::JSON)
-        .header(token_header(token))
+        .header(token_header(token.clone()))
         .body(json_string!({
-            "name": "test_hangzone",
+            "name": name,
             "description": null,
             "address_1": "a real place 120202",
             "address_2": null,
@@ -45,6 +58,5 @@ async fn create_hangzones_test() {
             "lng": 0.0
         }))
         .dispatch()
-        .await;
-    assert_eq!(response.status(), Status::Created);
+        .await
 }

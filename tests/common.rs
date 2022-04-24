@@ -22,6 +22,13 @@ pub fn token_header(token: Token) -> Header<'static> {
     Header::new("authorization", format!("Token {}", token))
 }
 
+pub async fn create_client() -> Client {
+    let rocket = hangzone_backend::rocket().await;
+    Client::tracked(rocket)
+        .await
+        .expect("Couldn't create rocket test client")
+}
+
 // Retrieve a token registering a user if required
 pub async fn login(client: &Client) -> Token {
     println!("Attempting to login");
