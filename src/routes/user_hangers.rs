@@ -26,15 +26,15 @@ pub async fn post_login(
     login_user: Json<LoginUser>,
     pool: &State<PgPool>,
     state: &State<AppState>,
-) -> Value {
+) -> Option<Value> {
     let login_user = login_user.into_inner().user_hanger;
     let secret = state.secret.clone();
 
     let user_hanger = db::user_hangers::login(pool, &login_user.email, &login_user.password).await;
     if let Some(user_hanger) = user_hanger {
-        return json!({ "user_hanger": user_hanger.to_user_auth(&secret) });
+        return Some(json!({ "user_hanger": user_hanger.to_user_auth(&secret) }));
     }
-    json!({ "user_hanger": null })
+    None
 }
 
 #[post("/users", data = "<user_body>")]

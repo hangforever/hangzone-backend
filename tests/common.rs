@@ -1,4 +1,8 @@
-use rocket::{local::asynchronous::{Client, LocalResponse}, http::ContentType};
+use rocket::serde::json::Value;
+use rocket::{
+    http::{ContentType, Header, Status},
+    local::asynchronous::{Client, LocalResponse},
+};
 
 pub const USERNAME: &'static str = "hangin_guy";
 pub const EMAIL: &'static str = "hangin_guy@protonmail.com";
@@ -14,18 +18,60 @@ macro_rules! json_string {
 
 pub type Token = String;
 
+pub fn token_header(token: Token) -> Header<'static> {
+    Header::new("authorization", format!("Token {}", token))
+}
+
 // Retrieve a token registering a user if required
-fn login(client: &Client) -> Token {
-    try_login(client).unwrap_or_else(|| {
-        register();
-        try_login(client).expect("could not register a new user and login")
-    })
+pub async fn login(client: &Client) -> Token {
+    println!("Attempting to login");
+    let res = try_login(client).await;
+    if let Some(token) = res {
+        println!("Got token: {}", token);
+        return token;
+    }
+    println!("No token. Registering...");
+    register(client, USERNAME, EMAIL, PASSWORD).await;
+    try_login(client)
+        .await
+        .expect("could not register a new user and login")
 }
 
-fn try_login(client: &Client) -> Option<Token> {
-    None
+/// Helper function for converting response to json value.
+pub async fn response_json_value<'a>(response: LocalResponse<'a>) -> Value {
+    let body = response.into_string().await.unwrap();
+    serde_json::from_str(&body).expect("can't parse value")
 }
 
-fn register(client: &Client, username: &str, email: &str, password: &str) {
-        let response = client.post("/api/user_hangers").header(ContentType::JSON).body(json_string!(
+async fn try_login(client: &Client) -> Option<Token> {
+    let response = client
+        .post("/api/users/login")
+        .header(ContentType::JSON)
+        .body(json_string!({"user_hanger": {"email": EMAIL, "password": PASSWORD}}))
+        .dispatch()
+        .await;
+    println!("status: {}", response.status());
+    if response.status() == Status::NotFound {
+        println!("Not found status returning None: {}", response.status());
+        return None;
+    }
+
+    let value = response_json_value(response).await;
+    println!("value: {}", value);
+    let token = value
+        .get("user_hanger")
+        .and_then(|user| user.get("token"))
+        .and_then(|token| token.as_str())
+        .map(String::from)
+        .expect("Cannot extract token");
+    Some(token)
+}
+
+async fn register(client: &Client, username: &str, email: &str, password: &str) {
+    let response = client
+        .post("/api/users")
+        .header(ContentType::JSON)
+        .body(json_string!({ "alias": username, "email_address": email, "password": password }))
+        .dispatch()
+        .await;
 }

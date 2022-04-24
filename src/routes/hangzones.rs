@@ -57,8 +57,13 @@ pub async fn get_hangzone(slug: String, pool: &State<PgPool>) -> Value {
 #[post("/hangzones/check_in?<slug>")]
 pub async fn check_in(auth: Auth, pool: &State<PgPool>, slug: String) -> Option<Status> {
     if let Some(hangzone) = db::hangzones::find_one(pool, Some(&slug), None).await {
-        db::user_hangers::update_hangzone_id(pool, auth.id, hangzone.id).await;
-        return Some(Status::Created);
+        return match db::user_hangers::update_hangzone_id(pool, auth.id, hangzone.id).await {
+            Ok(()) => Some(Status::Created),
+            Err(e) => {
+                eprintln!("Could not check into hangzone: {}", e);
+                Some(Status::UnprocessableEntity)
+            }
+        };
     }
     None
 }
