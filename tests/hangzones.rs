@@ -12,11 +12,17 @@ async fn get_hangzone_test() {
     let token = login(&client).await;
     let name = "my_hangzone_man".to_string();
     create_hangzone(&client, &token, &name).await;
+    let slug = slug::slugify(&name);
     let response = client
-        .get(format!("/api/hangzones/{}", name))
+        .get(format!("/api/hangzones/{}", slug))
         .dispatch()
         .await;
-    assert_eq!(response.status(), Status::Ok);
+    let body = response_json_value(response).await;
+    let h_name = body
+        .get("hangzone")
+        .and_then(|res| res.get("name"))
+        .and_then(|res| res.as_str());
+    assert_eq!(h_name, Some(name.as_ref()));
 }
 
 #[rocket::async_test]

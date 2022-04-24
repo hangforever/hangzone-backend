@@ -31,13 +31,10 @@ pub async fn create_client() -> Client {
 
 // Retrieve a token registering a user if required
 pub async fn login(client: &Client) -> Token {
-    println!("Attempting to login");
     let res = try_login(client).await;
     if let Some(token) = res {
-        println!("Got token: {}", token);
         return token;
     }
-    println!("No token. Registering...");
     register(client, USERNAME, EMAIL, PASSWORD).await;
     try_login(client)
         .await
@@ -75,7 +72,7 @@ async fn try_login(client: &Client) -> Option<Token> {
 }
 
 async fn register(client: &Client, username: &str, email: &str, password: &str) {
-    let response = client
+    client
         .post("/api/users")
         .header(ContentType::JSON)
         .body(json_string!({ "alias": username, "email_address": email, "password": password }))
