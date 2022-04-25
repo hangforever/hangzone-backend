@@ -24,19 +24,35 @@ pub struct HangzoneBody {
     pub lng: f64,
 }
 
+pub async fn delete_by_slug(pool: &PgPool, slug: &str) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "DELETE FROM hangzones 
+        WHERE slug = $1
+        RETURNING id",
+        slug
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn find_by_slug(pool: &PgPool, slug: &str) -> Result<Hangzone, sqlx::Error> {
+    sqlx::query_as!(
+        Hangzone,
+        "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, ST_AsGeoJson(geography) as geography, postal_code, state, created_at, updated_at FROM hangzones WHERE slug = $1",
+        slug
+    )
+    .fetch_one(pool)
+    .await
+}
+
 pub async fn find_one(
     pool: &PgPool,
     slug: Option<&str>,
     hangzone_id: Option<i32>,
 ) -> Option<Hangzone> {
     if let Some(s) = slug {
-        let hangzone = sqlx::query_as!(
-                Hangzone,
-                "SELECT id, slug, name, description, address_1, address_2, address_3, city, country, ST_AsGeoJson(geography) as geography, postal_code, state, created_at, updated_at FROM hangzones WHERE slug = $1",
-                s
-            )
-            .fetch_one(pool)
-            .await;
+        let hangzone = find_by_slug(pool, s).await;
         if let Ok(hangzone) = hangzone {
             return Some(hangzone);
         }
