@@ -224,15 +224,10 @@ paths:
       tags:
         - Hangzones
       summary: Get Hangzone
-      description: Get hangzones by slug. Auth is optional
+      description: Get hangzones by slug. Auth is optional.
       operationId: GetHangzone
       parameters:
-        - name: slug
-          in: path
-          description: Slug of the hangzone
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/hangzone_slug'      
       responses:
         200:
           description: OK
@@ -293,12 +288,7 @@ paths:
       description: Add a new friend
       operationId: CreateFriend
       parameters:
-        - name: friend_id
-          in: path
-          description: The ID of the UserHanger you wish to add
-          required: true
-          schema:
-            type: string
+        - $ref: #/components/parameters/friend_id
       responses:
         201:
           description: OK
@@ -332,6 +322,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericErrorModel'
 components:
+  parameters:
+    hangzone_slug:
+      name: hangzone_slug
+      in: path
+      required: true
+      description: Hangzone's reference
+      schema:
+        type: string
+    friend_id:
+      name: friend_id
+      in: path
+      description: The ID of the UserHanger you wish to add
+      required: true
+      schema:
+        type: string
   schemas:
     LoginUserHanger:
       required:
