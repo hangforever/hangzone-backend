@@ -22,7 +22,7 @@ struct LoginUserData {
 }
 
 #[post("/users/login", data = "<login_user>")]
-pub async fn post_login(
+pub async fn login(
     login_user: Json<LoginUser>,
     pool: &State<PgPool>,
     state: &State<AppState>,
@@ -76,7 +76,6 @@ pub async fn update_user(
     auth: Auth,
     update: Json<UserHangerUpdate>,
     pool: &State<PgPool>,
-    state: &State<AppState>,
 ) -> Value {
     if let Ok(mut hanger) = db::user_hangers::find_one(pool, auth.id).await {
         let update = update.into_inner();

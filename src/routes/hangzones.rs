@@ -22,7 +22,7 @@ pub async fn get_hangzones(
 
 #[post("/hangzones", data = "<hangzone_body>")]
 pub async fn create_hangzone(
-    auth: Auth,
+    _auth: Auth,
     hangzone_body: Json<HangzoneBody>,
     pool: &State<PgPool>,
 ) -> Result<Status, Status> {
@@ -40,10 +40,12 @@ pub async fn get_hangzone(slug: String, pool: &State<PgPool>) -> Value {
     let hangzone = db::hangzones::find_one(pool, Some(&slug), None).await;
 
     if let Some(hangzone) = hangzone {
-        // TODO: show hang sessions at this hangzone?
-        return json!({
-            "hangzone": hangzone,
-        });
+        if let Ok(sessions) = db::hang_sessions::find_by_hangzone(pool, hangzone.id).await {
+            return json!({
+                "hangzone": hangzone,
+                "hang_sessions": sessions,
+            });
+        }
     }
     json!({ "hangzone": null })
 }

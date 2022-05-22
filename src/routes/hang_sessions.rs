@@ -86,7 +86,7 @@ pub async fn join_hang_session(
 }
 
 #[post("/hang_sessions/leave")]
-pub async fn _hang_session(pool: &State<PgPool>, auth: Auth) -> Result<Status, &str> {
+pub async fn leave_hang_session(pool: &State<PgPool>, auth: Auth) -> Result<Status, &str> {
     db::hangers::delete(pool, auth.id).await.map_err(|e| {
         eprintln!("{}", e);
         "Could not join hangzone"

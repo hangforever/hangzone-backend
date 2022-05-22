@@ -52,30 +52,48 @@ pub async fn rocket() -> _ {
         .mount(
             "/api",
             routes![
+                // done
                 routes::friend_requests::accept_friend,
+                // done
                 routes::friend_requests::cancel_friend,
+                // done
                 routes::friend_requests::decline_friend,
+                // done
                 routes::friend_requests::get_friend_requests,
+                // done
                 routes::friend_requests::request_friend,
+                // done
                 routes::friends::delete_friend,
+                // done
                 routes::friends::get_friends,
                 routes::hang_requests::accept_hang,
                 routes::hang_requests::cancel_hang,
                 routes::hang_requests::decline_hang,
                 routes::hang_requests::get_hang_requests,
                 routes::hang_requests::request_hang,
+                // done
                 routes::hangzones::create_hangzone,
+                // done
                 routes::hangzones::get_hangzone,
+                // done
+                routes::hangzones::get_hangzones,
                 routes::hang_sessions::create_hang_session,
                 routes::hang_sessions::get_hang_session,
                 routes::hang_sessions::get_hang_sessions,
-                routes::hangzones::get_hangzones,
+                routes::hang_sessions::join_hang_session,
+                routes::hang_sessions::leave_hang_session,
                 routes::notifications::get_notifications,
                 routes::notifications::update_read,
                 routes::notifications::update_trash,
-                routes::user_hangers::post_login,
+                // done
+                routes::user_hangers::login,
+                // done
                 routes::user_hangers::register_user,
+                // done
+                routes::user_hangers::get_user,
+                // done
                 routes::user_hangers::update_position,
+                // done
                 routes::user_hangers::update_user,
             ],
         )

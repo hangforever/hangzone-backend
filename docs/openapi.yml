@@ -50,7 +50,7 @@ paths:
         - User and Authentication
       summary: Register a new user
       description: Register a new user
-      operationId: CreateUser
+      operationId: RegisterUser
       requestBody:
         description: Details of the new user to register
         content:
@@ -96,7 +96,7 @@ paths:
       tags:
         - User and Authentication
       summary: Update current user
-      description: Not implemented! - Updated user information for current user
+      description: Updated user information for current user
       operationId: UpdateCurrentUser
       requestBody:
         description: User details to update. At least **one** field is required.
@@ -130,7 +130,7 @@ paths:
         - UserHangers
       summary: Update hanger location
       description: Update a hanger's location
-      operationId: UpdateHangerLocation
+      operationId: UpdatePosition
       requestBody:
         description: The position to update the UserHanger to. Given as lat/lng.
         content:
@@ -286,16 +286,16 @@ paths:
         - Token: []
       x-codegen-request-body-name: hangzone
   /friends/{friend_id}:
-    post:
+    delete:
       tags:
         - Friends
-      summary: Add friend
-      description: Add a new friend
-      operationId: CreateFriend
+      summary: Remove friend
+      description: Remove a friend
+      operationId: RemoveFriend
       parameters:
         - name: friend_id
           in: path
-          description: The ID of the UserHanger you wish to add
+          description: The ID of the UserHanger you wish to remove
           required: true
           schema:
             type: string
@@ -308,17 +308,85 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorModel'
-      x-codegen-request-body-name: body
-    delete:
+  /requests/friends:
+    get:
+      responses:
+        200:
+          description: gives you the friend requests
+  /requests/friends/{friend_id}:
+    get:
       tags:
-        - Friends
-      summary: Remove friend
-      description: Remove a friend
-      operationId: RemoveFriend
+        - FriendRequests
+      summary: Request a new friend
+      description: Send a friend request to someone. Cannot request from a user you are already friends with. 
+      operationId: RequestFriend
       parameters:
         - name: friend_id
           in: path
-          description: The ID of the UserHanger you wish to remove
+          description: The ID of the UserHanger you wish to to be friends with
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: OK
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+  /requests/friends/cancel/{friend_id}:
+    post:
+      tags:
+        - FriendRequests
+      summary: Cancel a friend request 
+      operationId: CancelRequestFriend
+      parameters:
+        - name: friend_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: OK
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+  /requests/friends/decline/{friend_id}:
+    post:
+      tags:
+        - FriendRequests
+      summary: Decline a friend request 
+      operationId: DeclineRequestFriend
+      parameters:
+        - name: friend_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: OK
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+  /requests/friends/accept/{friend_id}:
+    post:
+      tags:
+        - FriendRequests
+      summary: Accept a friend request 
+      operationId: AcceptRequestFriend
+      parameters:
+        - name: friend_id
+          in: path
           required: true
           schema:
             type: string
@@ -666,6 +734,24 @@ components:
         trash:
           type: boolean
         created_at:
+          type: string
+    HangSession:
+      required:
+        - id
+        - name
+        - description
+        - hangzone_id
+        - starts_at
+      properties:
+        id:
+          type: number
+        name: 
+          type: string
+        description:
+          type: string
+        hangzone_id:
+          type: number
+        starts_at:
           type: string
     securitySchemes:
       Token:
