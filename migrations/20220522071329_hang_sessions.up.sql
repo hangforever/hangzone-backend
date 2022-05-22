@@ -12,7 +12,8 @@ CREATE TABLE hangers (
   hang_session_id integer REFERENCES hang_sessions NOT NULL,
   user_hanger_id integer REFERENCES user_hangers NOT NULL,
   host boolean DEFAULT false,
-  joined_at timestamptz NOT NULL DEFAULT NOW()
+  joined_at timestamptz NOT NULL DEFAULT NOW(),
+  UNIQUE(hang_session_id, user_hanger_id)
 );
 
 ALTER TABLE request_hangs
