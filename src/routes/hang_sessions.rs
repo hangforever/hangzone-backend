@@ -62,3 +62,15 @@ pub async fn create_hang_session(
         }
     }
 }
+
+#[post("/hang_sessions/join")]
+pub async fn join_hang_session(pool: &State<PgPool>) -> Result<Status, &str> {
+    // TODO: join hang session
+    Ok(Status::Created)
+}
+
+#[post("/hang_sessions/leave")]
+pub async fn _hang_session(pool: &State<PgPool>) -> Result<Status, &str> {
+    // TODO: join hang session
+    Ok(Status::Created)
+}

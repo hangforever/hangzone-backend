@@ -79,17 +79,12 @@ async fn handle_hang_requested_notification<'a, 'b>(
     friend_id: i32,
     alias: &str,
 ) -> Result<(), &'b str> {
-    db::notifications::create_one(
-        pool,
-        friend_id,
-        NotificationType::Hang,
-        &format!("{} wants to hang!", alias),
-    )
-    .await
-    .map_err(|e| {
-        eprintln!("Err creating hang request: {}", e);
-        "Error creating hang request"
-    })?;
+    db::notifications::create_one(pool, friend_id, NotificationType::Hang)
+        .await
+        .map_err(|e| {
+            eprintln!("Err creating hang request: {}", e);
+            "Error creating hang request"
+        })?;
     Ok(())
 }
 

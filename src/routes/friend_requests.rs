@@ -48,17 +48,12 @@ async fn handle_friend_requested_notification<'a, 'b>(
     friend_id: i32,
     alias: &str,
 ) -> Result<(), &'b str> {
-    db::notifications::create_one(
-        pool,
-        friend_id,
-        NotificationType::FriendAdded,
-        &format!("{} requested you as a friend!", alias),
-    )
-    .await
-    .map_err(|e| {
-        eprintln!("Err creating friend: {}", e);
-        "Error creating notification for friend"
-    })?;
+    db::notifications::create_one(pool, friend_id, NotificationType::FriendAdded)
+        .await
+        .map_err(|e| {
+            eprintln!("Err creating friend: {}", e);
+            "Error creating notification for friend"
+        })?;
     Ok(())
 }
 
@@ -134,15 +129,10 @@ async fn handle_friend_added_notification<'a, 'b>(
     friend_id: i32,
     alias: &str,
 ) -> Result<(), &'b str> {
-    db::notifications::create_one(
-        pool,
-        friend_id,
-        NotificationType::FriendAdded,
-        &format!("{} added you as a friend!", alias),
-    )
-    .await
-    .map_err(|e| {
-        eprintln!("Err creating friend: {}", e);
-        "Error creating notification"
-    })
+    db::notifications::create_one(pool, friend_id, NotificationType::FriendAdded)
+        .await
+        .map_err(|e| {
+            eprintln!("Err creating friend: {}", e);
+            "Error creating notification"
+        })
 }

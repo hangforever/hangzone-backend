@@ -40,25 +40,10 @@ pub async fn get_hangzone(slug: String, pool: &State<PgPool>) -> Value {
     let hangzone = db::hangzones::find_one(pool, Some(&slug), None).await;
 
     if let Some(hangzone) = hangzone {
-        let res = db::user_hangers::find(pool, &slug).await.map_err(|err| {
-            eprint!("Couldn't get user profiles: {}", err);
+        // TODO: show hang sessions at this hangzone?
+        return json!({
+            "hangzone": hangzone,
         });
-        if let Ok(user_hangers) = res {
-            let profiles: Vec<_> = user_hangers.iter().map(|uh| uh.to_profile()).collect();
-            return json!({
-                "hangzone": hangzone,
-                "profiles": profiles,
-            });
-        }
     }
     json!({ "hangzone": null })
-}
-
-#[post("/hangzones/check_in?<slug>")]
-pub async fn check_in(auth: Auth, pool: &State<PgPool>, slug: String) -> Option<Status> {
-    if let Some(hangzone) = db::hangzones::find_one(pool, Some(&slug), None).await {
-        db::user_hangers::update_hangzone_id(pool, auth.id, hangzone.id).await;
-        return Some(Status::Created);
-    }
-    None
 }
