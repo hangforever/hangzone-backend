@@ -28,7 +28,7 @@ pub async fn find(pool: &PgPool, user_hanger_id: i32) -> Result<Vec<Notification
     sqlx::query_as!(
         Notification,
         r#"
-            SELECT id, user_hanger_id, notification_type as "notification_type: NotificationType", read, trash, created_at, updated_at 
+            SELECT id, user_hanger_id, notification_type as "notification_type: NotificationType", read, trash, created_at 
             FROM notifications 
             WHERE 
               user_hanger_id = $1 AND
