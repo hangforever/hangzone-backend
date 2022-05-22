@@ -399,6 +399,99 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorModel'
+  /requests/hangs:
+    get:
+      responses:
+        200:
+          description: gives you the hang requests
+    post:
+      tags:
+        - HangRequests
+      summary: Request a hang with a friend
+      operationId: HangRequestFriend
+      requestBody:
+        description: The body of the Hangzone data
+        content:
+          application/json:
+            schema:
+              message:
+                type: string
+              hang_sessions_id:
+                type: number
+              friend_ids:
+                type: array
+      responses:
+        201:
+          description: O
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+  /requests/hangs/cancel/{friend_id}:
+    post:
+      tags:
+        - HangRequests
+      summary: Cancel a hang request 
+      operationId: CancelRequesthang
+      parameters:
+        - name: friend_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: OK
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+  /requests/hangs/decline/{friend_id}:
+    post:
+      tags:
+        - hangRequests
+      summary: Decline a hang request 
+      operationId: DeclineRequesthang
+      parameters:
+        - name: friend_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: OK
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+  /requests/hangs/accept/{friend_id}:
+    post:
+      tags:
+        - HangRequests
+      summary: Accept a hang request 
+      operationId: AcceptRequesthang
+      parameters:
+        - name: friend_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: OK
+        422:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
   /notifications:
     get:
       tags:
@@ -451,6 +544,115 @@ paths:
       operationId: PutNotificationInTrash
       responses:
         201:
+          description: OK
+        401:
+          description: Unauthorized
+          content: {}
+  /hang_sessions:
+    get:
+      tags:
+        - HangSessions
+      summary: Get hang sessions 
+      description: Get hang sessions by a search string or a position
+      operationId: GetHangSessions
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: position
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/Position'
+      responses:
+        200:
+          description: OK
+        401:
+          description: Unauthorized
+          content: {}
+    post:
+      tags:
+        - HangSessions
+      summary: Create hang session
+      description: Create hang sessions by a search string or a position
+      operationId: CreateHangSessions
+      requestBody:
+        description: Credentials to use
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                hangzone_id:
+                  type: number
+                starts_at:
+                  type: string
+        required: true
+      responses:
+        201:
+          description: OK
+        401:
+          description: Unauthorized
+          content: {}
+  /hang_sessions/<hang_session_id>:
+    get:
+      tags:
+        - HangSessions
+      summary: Get hang session 
+      description: Get hang session by id
+      operationId: GetHangSession
+      parameters:
+        - name: hang_session_id
+          in: path
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+        401:
+          description: Unauthorized
+          content: {}
+  /hang_sessions/join/<hang_session_id>:
+    post:
+      tags:
+        - HangSessions
+      summary: Join hang session 
+      description: Join hang session by id
+      operationId: JoinHangSession
+      parameters:
+        - name: hang_session_id
+          in: path
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+        401:
+          description: Unauthorized
+          content: {}
+  /hang_sessions/leave:
+    post:
+      tags:
+        - HangSessions
+      summary: Leave hang session 
+      description: Leave hang session by id
+      operationId: LeaveHangSession
+      parameters:
+        - name: hang_session_id
+          in: path
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
           description: OK
         401:
           description: Unauthorized

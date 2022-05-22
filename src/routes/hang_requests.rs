@@ -2,7 +2,7 @@ use super::PaginationParams;
 use crate::auth::Auth;
 use crate::db;
 use crate::models::notifications::NotificationType;
-use crate::models::requests::{FriendRequest, RequestStatus};
+use crate::models::requests::RequestStatus;
 use rocket::http::Status;
 use rocket::serde::json::{json, Json, Value};
 use rocket::serde::Deserialize;
@@ -63,7 +63,7 @@ pub async fn request_hang(
                 .await
                 .map_err(|e| e.to_string())?;
                 // send notification
-                handle_hang_requested_notification(pool, friend_id, &auth.alias)
+                handle_hang_requested_notification(pool, friend_id)
                     .await
                     .map_err(|e| e.to_string())?;
                 transaction.commit().await.map_err(|e| e.to_string())?;
@@ -77,7 +77,6 @@ pub async fn request_hang(
 async fn handle_hang_requested_notification<'a, 'b>(
     pool: &'a State<PgPool>,
     friend_id: i32,
-    alias: &str,
 ) -> Result<(), &'b str> {
     db::notifications::create_one(pool, friend_id, NotificationType::Hang)
         .await

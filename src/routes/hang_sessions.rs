@@ -1,6 +1,5 @@
 use crate::auth::Auth;
 use crate::db;
-use crate::models::hang_sessions::HangSession;
 use crate::position::Position;
 use chrono::{DateTime, Utc};
 use rocket::http::Status;
@@ -70,7 +69,7 @@ pub async fn join_hang_session(
     hang_session_id: i32,
 ) -> Result<Status, &str> {
     // Just sign the user out of other hangzone if they have one
-    if let Ok(hanger) = db::hangers::find(pool, auth.id).await {
+    if let Ok(_hanger) = db::hangers::find(pool, auth.id).await {
         db::hangers::delete(pool, auth.id).await.map_err(|e| {
             eprintln!("{}", e);
             "Could not log user out of currently joined hangzone"
