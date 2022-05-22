@@ -21,7 +21,6 @@ pub struct HangRequest {
     pub id: i32,
     pub from_user_hanger_id: i32,
     pub to_user_hanger_id: i32,
-    pub message: Option<String>,
     pub status: RequestStatus,
     pub hang_session_id: i32,
     pub created_at: DateTime<Utc>,
@@ -33,7 +32,6 @@ pub struct FriendRequest {
     pub id: i32,
     pub from_user_hanger_id: i32,
     pub to_user_hanger_id: i32,
-    pub message: Option<String>,
     pub status: RequestStatus,
     pub created_at: DateTime<Utc>,
 }

@@ -19,18 +19,17 @@ pub async fn get_friend_requests(auth: Auth, pool: &State<PgPool>) -> Value {
     json!({ "friend_requests": requests })
 }
 
-#[post("/requests/friends/<friend_id>?<message>")]
+#[post("/requests/friends/<friend_id>")]
 pub async fn request_friend(
     auth: Auth,
     friend_id: i32,
-    message: Option<String>,
     pool: &State<PgPool>,
 ) -> Result<Status, &str> {
     db::friends::find_one(pool, auth.id, friend_id)
         .await
         .ok_or("Friend already exists")?;
     let transaction = pool.begin().await.map_err(|e| "Transaction error")?;
-    db::request_friends::create(pool, auth.id, friend_id, message)
+    db::request_friends::create(pool, auth.id, friend_id)
         .await
         .map_err(|e| {
             eprintln!("Problem creating friend request: {}", e);

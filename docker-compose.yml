@@ -1,12 +1,9 @@
 version: "3.8"
 
 services:
-  web:
-    build: .
-    ports:
-      - '8080:8080'
   postgres:
     image: postgis/postgis
+    restart: always
     container_name: db
     environment:
       - DATABASE_HOST=127.0.0.1
