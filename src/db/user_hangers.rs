@@ -24,14 +24,6 @@ pub async fn find_one(pool: &PgPool, user_hanger_id: i32) -> Result<UserHanger, 
         .await
 }
 
-pub async fn find(pool: &PgPool, hangzone_slug: &str) -> Result<Vec<UserHanger>, sqlx::Error> {
-    sqlx::query("SELECT * FROM user_hangers INNER JOIN hangzones ON user_hangers.current_hangzone_id = hangzones.id WHERE hangzones.slug = $1")
-        .bind(hangzone_slug)
-        .map(|row| row_to_user_hanger_json(row))
-        .fetch_all(pool)
-        .await
-}
-
 pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Result<UserHanger, sqlx::Error> {
     let salt = SaltString::generate(&mut OsRng);
     let hash = Scrypt
@@ -53,7 +45,7 @@ pub async fn create_one(pool: &PgPool, user_body: UserBody) -> Result<UserHanger
                      created_at,
                      updated_at)
         VALUES      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        RETURNING id, first_name, last_name, alias, email_address, status_hang as "status_hang!: StatusHang", status_description, icon_url, hash, current_hangzone_id, created_at, updated_at
+        RETURNING id, first_name, last_name, alias, email_address, status_hang as "status_hang!: StatusHang", status_description, icon_url, hash, created_at, updated_at
     "#,
         "Anonymous".to_string(),
         "Hanger".to_string(),
@@ -103,9 +95,8 @@ pub async fn update(pool: &PgPool, user_hanger: UserHanger) -> Result<(), sqlx::
           status_hang = $5,
           status_description = $6,
           icon_url = $7,
-          hash = $8,
-          current_hangzone_id = $9
-        WHERE id = $10
+          hash = $8
+        WHERE id = $9
         RETURNING id
         ",
         user_hanger.first_name,
@@ -116,29 +107,7 @@ pub async fn update(pool: &PgPool, user_hanger: UserHanger) -> Result<(), sqlx::
         user_hanger.status_description,
         user_hanger.icon_url,
         user_hanger.hash,
-        user_hanger.current_hangzone_id,
         user_hanger.id,
-    )
-    .fetch_one(pool)
-    .await?;
-    Ok(())
-}
-
-pub async fn update_hangzone_id(
-    pool: &PgPool,
-    id: i32,
-    hangzone_id: i32,
-) -> Result<(), sqlx::Error> {
-    sqlx::query!(
-        "
-        UPDATE user_hangers 
-        SET 
-          current_hangzone_id = $1
-        WHERE id = $2
-        RETURNING id
-        ",
-        hangzone_id,
-        id,
     )
     .fetch_one(pool)
     .await?;
@@ -176,7 +145,6 @@ pub fn row_to_user_hanger_json(row: sqlx::postgres::PgRow) -> UserHanger {
         status_hang: row.get("status_hang"),
         status_description: row.get("status_description"),
         icon_url: row.get("icon_url"),
-        current_hangzone_id: row.get("current_hangzone_id"),
         hash: row.get("hash"),
         created_at: row.get("created_at"),
         updated_at: row.get("updated_at"),

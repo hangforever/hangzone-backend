@@ -19,24 +19,23 @@ pub async fn get_friend_requests(auth: Auth, pool: &State<PgPool>) -> Value {
     json!({ "friend_requests": requests })
 }
 
-#[post("/requests/friends/<friend_id>?<message>")]
+#[post("/requests/friends/<friend_id>")]
 pub async fn request_friend(
     auth: Auth,
     friend_id: i32,
-    message: Option<String>,
     pool: &State<PgPool>,
 ) -> Result<Status, &str> {
     db::friends::find_one(pool, auth.id, friend_id)
         .await
         .ok_or("Friend already exists")?;
     let transaction = pool.begin().await.map_err(|e| "Transaction error")?;
-    db::request_friends::create(pool, auth.id, friend_id, message)
+    db::request_friends::create(pool, auth.id, friend_id)
         .await
         .map_err(|e| {
             eprintln!("Problem creating friend request: {}", e);
             "Problem creating friend request"
         })?;
-    handle_friend_requested_notification(pool, friend_id, &auth.alias).await?;
+    handle_friend_requested_notification(pool, friend_id).await?;
     transaction.commit().await.map_err(|e| {
         eprintln!("Err commiting transaction: {}", e);
         "Error with friend request"
@@ -47,19 +46,13 @@ pub async fn request_friend(
 async fn handle_friend_requested_notification<'a, 'b>(
     pool: &'a State<PgPool>,
     friend_id: i32,
-    alias: &str,
 ) -> Result<(), &'b str> {
-    db::notifications::create_one(
-        pool,
-        friend_id,
-        NotificationType::FriendAdded,
-        &format!("{} requested you as a friend!", alias),
-    )
-    .await
-    .map_err(|e| {
-        eprintln!("Err creating friend: {}", e);
-        "Error creating notification for friend"
-    })?;
+    db::notifications::create_one(pool, friend_id, NotificationType::FriendAdded)
+        .await
+        .map_err(|e| {
+            eprintln!("Err creating friend: {}", e);
+            "Error creating notification for friend"
+        })?;
     Ok(())
 }
 
@@ -122,7 +115,7 @@ pub async fn accept_friend(
     db::friends::create_one(pool, auth.id, friend_id)
         .await
         .map_err(|e| "Error adding friend")?;
-    handle_friend_added_notification(pool, friend_id, &auth.alias).await?;
+    handle_friend_added_notification(pool, friend_id).await?;
     transaction.commit().await.map_err(|e| {
         eprintln!("Transaction begin err: {}", e);
         "Error with friend request"
@@ -133,17 +126,11 @@ pub async fn accept_friend(
 async fn handle_friend_added_notification<'a, 'b>(
     pool: &'a State<PgPool>,
     friend_id: i32,
-    alias: &str,
 ) -> Result<(), &'b str> {
-    db::notifications::create_one(
-        pool,
-        friend_id,
-        NotificationType::FriendAdded,
-        &format!("{} added you as a friend!", alias),
-    )
-    .await
-    .map_err(|e| {
-        eprintln!("Err creating friend: {}", e);
-        "Error creating notification"
-    })
+    db::notifications::create_one(pool, friend_id, NotificationType::FriendAdded)
+        .await
+        .map_err(|e| {
+            eprintln!("Err creating friend: {}", e);
+            "Error creating notification"
+        })
 }

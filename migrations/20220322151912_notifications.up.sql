@@ -7,7 +7,5 @@ CREATE TABLE notifications (
   notification_type notification_type NOT NULL,
   read boolean NOT NULL DEFAULT FALSE,
   trash boolean NOT NULL DEFAULT FALSE,
-  content text NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT NOW(),
-  updated_at timestamptz NOT NULL DEFAULT NOW()
+  created_at timestamptz NOT NULL DEFAULT NOW()
 );

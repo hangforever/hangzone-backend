@@ -18,6 +18,4 @@ pub struct Notification {
     pub read: bool,
     pub trash: bool,
     pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-    pub content: String,
 }

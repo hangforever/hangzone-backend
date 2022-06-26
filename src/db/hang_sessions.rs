@@ -88,3 +88,20 @@ pub async fn create_one(
     .fetch_one(pool)
     .await
 }
+
+pub async fn find_by_hangzone(
+    pool: &PgPool,
+    hangzone_id: i32,
+) -> Result<Vec<HangSession>, sqlx::Error> {
+    sqlx::query_as!(
+        HangSession,
+        "
+        SELECT id, name, description, hangzone_id, starts_at 
+        FROM hang_sessions hs
+        WHERE hangzone_id = $1  
+        ",
+        hangzone_id
+    )
+    .fetch_all(pool)
+    .await
+}

@@ -22,7 +22,7 @@ pub async fn get_hangzones(
 
 #[post("/hangzones", data = "<hangzone_body>")]
 pub async fn create_hangzone(
-    auth: Auth,
+    _auth: Auth,
     hangzone_body: Json<HangzoneBody>,
     pool: &State<PgPool>,
 ) -> Result<Status, Status> {
@@ -40,30 +40,12 @@ pub async fn get_hangzone(slug: String, pool: &State<PgPool>) -> Value {
     let hangzone = db::hangzones::find_one(pool, Some(&slug), None).await;
 
     if let Some(hangzone) = hangzone {
-        let res = db::user_hangers::find(pool, &slug).await.map_err(|err| {
-            eprint!("Couldn't get user profiles: {}", err);
-        });
-        if let Ok(user_hangers) = res {
-            let profiles: Vec<_> = user_hangers.iter().map(|uh| uh.to_profile()).collect();
+        if let Ok(sessions) = db::hang_sessions::find_by_hangzone(pool, hangzone.id).await {
             return json!({
                 "hangzone": hangzone,
-                "profiles": profiles,
+                "hang_sessions": sessions,
             });
         }
     }
     json!({ "hangzone": null })
-}
-
-#[post("/hangzones/check_in?<slug>")]
-pub async fn check_in(auth: Auth, pool: &State<PgPool>, slug: String) -> Option<Status> {
-    if let Some(hangzone) = db::hangzones::find_one(pool, Some(&slug), None).await {
-        return match db::user_hangers::update_hangzone_id(pool, auth.id, hangzone.id).await {
-            Ok(()) => Some(Status::Created),
-            Err(e) => {
-                eprintln!("Could not check into hangzone: {}", e);
-                Some(Status::UnprocessableEntity)
-            }
-        };
-    }
-    None
 }

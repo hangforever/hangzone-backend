@@ -24,7 +24,6 @@ pub struct UserHanger {
     pub icon_url: Option<String>,
     pub hash: String,
     // pub geography: (f32, f32),
-    pub current_hangzone_id: Option<i32>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

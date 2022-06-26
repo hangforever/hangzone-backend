@@ -24,7 +24,7 @@ pub struct NotificationReqData {
     ids: Vec<i32>,
 }
 
-#[put("/notifications/read", data = "<data>")]
+#[post("/notifications/read", data = "<data>")]
 pub async fn update_read(
     data: Json<NotificationReqData>,
     pool: &State<PgPool>,
@@ -34,7 +34,7 @@ pub async fn update_read(
         .map_err(|e| e.to_string())
 }
 
-#[put("/notifications/trash", data = "<data>")]
+#[post("/notifications/trash", data = "<data>")]
 pub async fn update_trash(
     data: Json<NotificationReqData>,
     pool: &State<PgPool>,
