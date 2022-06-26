@@ -13,6 +13,14 @@ info:
 servers:
   - url: /api
 paths:
+  /requests/friends:
+    get:
+      summary: Get friend requests
+      description: Get all of ones own friend requests
+  /requests/friends/accept/{friend_id}:
+    parameters:
+      $ref: #/components/paramters/friend_id
+
   /users/login:
     post:
       tags:
@@ -44,6 +52,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericErrorModel'
       x-codegen-request-body-name: body
+
   /users:
     post:
       tags:
@@ -124,6 +133,7 @@ paths:
       security:
         - Token: []
       x-codegen-request-body-name: body
+
   /users/location:
     put:
       tags:
@@ -148,6 +158,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericErrorModel'
       x-codegen-request-body-name: body
+
   /hangzones:
     get:
       tags:
@@ -219,15 +230,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorModel'
+
   /hangzones/{slug}:
+    parameters:
+      - $ref: '#/components/parameters/hangzone_slug'      
     get:
       tags:
         - Hangzones
       summary: Get Hangzone
       description: Get hangzones by slug. Auth is optional.
       operationId: GetHangzone
-      parameters:
-        - $ref: '#/components/parameters/hangzone_slug'      
       responses:
         200:
           description: OK
@@ -247,6 +259,7 @@ paths:
       security:
         - Token: []
       x-codegen-request-body-name: hangzone
+
   /friends:
     get:
       tags:
@@ -280,15 +293,16 @@ paths:
       security:
         - Token: []
       x-codegen-request-body-name: hangzone
+
   /friends/{friend_id}:
+    parameters:
+      - $ref: #/components/parameters/friend_id
     post:
       tags:
         - Friends
       summary: Add friend
       description: Add a new friend
       operationId: CreateFriend
-      parameters:
-        - $ref: #/components/parameters/friend_id
       responses:
         201:
           description: OK
@@ -321,6 +335,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorModel'
+
 components:
   parameters:
     hangzone_slug:
@@ -339,10 +354,10 @@ components:
         type: string
   schemas:
     LoginUserHanger:
+      type: object
       required:
         - email
         - password
-      type: object
       properties:
         email:
           type: string
@@ -350,18 +365,18 @@ components:
           type: string
           format: password
     LoginUserHangerRequest:
+      type: object
       required:
         - user
-      type: object
       properties:
         user_hanger:
           $ref: '#/components/schemas/LoginUser'
     NewUserHanger:
+      type: object
       required:
         - email
         - password
         - alias
-      type: object
       properties:
         alias:
           type: string
@@ -371,13 +386,14 @@ components:
           type: string
           format: password
     NewUserRequest:
+      type: object
       required:
         - user
-      type: object
       properties:
         user_hanger:
           $ref: '#/components/schemas/NewUser'
     UserHanger:
+      type: object
       required:
         - id
         - first_name
@@ -385,7 +401,6 @@ components:
         - alias
         - status_hang
         - token
-      type: object
       properties:
         id:
           type: number
@@ -406,9 +421,9 @@ components:
         token:
           type: string
     UserResponse:
+      type: object
       required:
         - user_hanger
-      type: object
       properties:
         user_hanger:
           $ref: '#/components/schemas/UserHanger'
@@ -426,23 +441,23 @@ components:
         image:
           type: string
     UpdateUserRequest:
+      type: object
       required:
         - user
-      type: object
       properties:
         user_hanger:
           $ref: '#/components/schemas/UpdateUser'
     ProfileResponse:
+      type: object
       required:
         - profile
-      type: object
       properties:
         profile:
           $ref: '#/components/schemas/Profile'
     Profile:
+      type: object
       required:
         - alias
-      type: object
       properties:
         alias:
           type: string
@@ -451,6 +466,7 @@ components:
         icon_url:
           type: string
     Hangzone:
+      type: object
       required:
         - id
         - slug
@@ -460,7 +476,6 @@ components:
         - country
         - createdAt
         - updatedAt
-      type: object
       properties:
         id:
           type: integer
@@ -491,25 +506,25 @@ components:
           type: string
           format: date-time
     SingleHangzoneResponse:
+      type: object
       required:
         - hangzone
-      type: object
       properties:
         hangzone:
           $ref: '#/components/schemas/Hangzone'
     MultipleHangzonesResponse:
+      type: object
       required:
         - hangzones
-      type: object
       properties:
         hangzones:
           type: array
           items:
             $ref: '#/components/schemas/Hangzone'
     GenericErrorModel:
+      type: object
       required:
         - errors
-      type: object
       properties:
         errors:
           required:
@@ -521,6 +536,7 @@ components:
               items:
                 type: string
     CreateHangzoneRequest:
+      type: object
       required:
         - name
         - address_1
@@ -528,7 +544,6 @@ components:
         - country
         - lat
         - lng
-      type: object
       properties:
         name:
           type: string
@@ -553,6 +568,7 @@ components:
         lng:
           type: number
     Friend:
+      type: object
       required:
         - id
         - first_name
@@ -560,7 +576,6 @@ components:
         - alias
         - status_hang
         - token
-      type: object
       properties:
         id:
           type: number
@@ -581,24 +596,69 @@ components:
         token:
           type: string
     MultipleFriendsResponse:
+      type: object
       required:
         - friends
-      type: object
       properties:
         friends:
           type: array
           items:
             $ref: '#/components/schemas/Friend'
     Position:
+      type: object
       required:
         - lat
         - lng
-      type: object
       properties:
         lat:
           type: number
         lng:
           type: number
+    FriendRequest:
+      type: object
+      required:
+        - from_user_hanger
+        - message
+        - status
+        - created_at
+      from_user_hanger: 
+        $ref: #components/schemas/UserHanger
+      message: 
+        type: string
+      status: 
+        type: string
+      created_at: 
+        type: string
+    HangRequest:
+      type: object
+      required:
+        - from_user_hanger
+        - message
+        - status
+        - hang_session
+        - created_at
+      from_user_hanger: 
+        $ref: #components/schemas/UserHanger
+      message: 
+        type: string 
+      status: 
+        type: string
+      hang_session: 
+        $ref: #components/schemas/HangSession
+      created_at: 
+        type: string
+    HangSession:
+      type: object
+        id: 
+          type: number
+        name: 
+          type: string
+        description: 
+          type: string
+        hangzone_id: 
+          type: number
+        starts_at: 
+          type: string 
   securitySchemes:
     Token:
       type: apiKey
